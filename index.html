@@ -1683,9 +1683,21 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram?.WebApp || {
+            expand: ()=>{}, ready: ()=>{}, initDataUnsafe: {}, initData: '',
+            HapticFeedback: null, sendData: ()=>{},
+            showPopup: (opts) => alert((opts.title ? opts.title + '\n' : '') + (opts.message||''))
+        };
         tg.expand();
         tg.ready();
+
+        function safeShowPopup(title, message) {
+            try { tg.showPopup({ title, message, buttons: [{ type: 'ok' }] }); }
+            catch(e) { alert(title + '\n' + message); }
+        }
+        function safeHaptic(type, val) {
+            try { if (tg.HapticFeedback) tg.HapticFeedback[type]?.(val); } catch(e) {}
+        }
         
         const telegramUser = tg.initDataUnsafe?.user;
         const USER_ID = telegramUser?.id || 'guest_' + Date.now();
@@ -1960,7 +1972,7 @@
         }
 
         function toggleTask(idx) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            safeHaptic('impactOccurred', 'light');
             
             const task = state.tasks[idx];
             if (!task) return;
@@ -1994,7 +2006,7 @@
         }
 
         function viewTask(idx) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            safeHaptic('impactOccurred', 'medium');
             
             const pending = state.tasks.filter(t => !t.completed);
             const task = pending[idx];
@@ -2084,7 +2096,7 @@
             const name = document.getElementById('new-tag-name').value.trim();
             if (!name) return;
             
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            safeHaptic('notificationOccurred', 'success');
             
             state.tags.push({ name, color: selectedTagColor, emoji: '🏷' });
             document.getElementById('new-tag-name').value = '';
@@ -2093,7 +2105,7 @@
         }
 
         function removeCustomTag(idx) {
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+            safeHaptic('notificationOccurred', 'warning');
             state.tags.splice(idx, 1);
             saveState();
             renderTags();
@@ -2121,7 +2133,7 @@
                 return;
             }
             
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            safeHaptic('notificationOccurred', 'success');
             
             state.user.theme = id;
             
@@ -2134,7 +2146,7 @@
         }
 
         function selectPlan(plan) {
-            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+            safeHaptic('selectionChanged');
             selectedPlan = plan;
             document.querySelectorAll('.premium-plan').forEach(el => {
                 el.classList.toggle('selected', el.dataset.plan === plan);
@@ -2142,7 +2154,7 @@
         }
 
         function buyPremium() {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            safeHaptic('impactOccurred', 'medium');
             
             const prices = { month: 150, year: 999 };
             const months = { month: 1, year: 12 };
@@ -2156,7 +2168,7 @@
         }
         
         function checkPremium() {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            safeHaptic('impactOccurred', 'light');
             
             tg.sendData(JSON.stringify({
                 action: 'check_premium'
@@ -2204,12 +2216,12 @@
         }
 
         function openModal(id) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            safeHaptic('impactOccurred', 'light');
             document.getElementById(id).classList.add('open');
         }
 
         function closeModal(id) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            safeHaptic('impactOccurred', 'light');
             document.getElementById(id).classList.remove('open');
         }
         
@@ -2224,7 +2236,7 @@
 
         document.querySelectorAll('.nav-pill').forEach(pill => {
             pill.onclick = () => {
-                if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                safeHaptic('selectionChanged');
                 document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -2234,7 +2246,7 @@
 
         document.querySelectorAll('#priority-options .option-btn').forEach(btn => {
             btn.onclick = () => {
-                if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                safeHaptic('selectionChanged');
                 document.querySelectorAll('#priority-options .option-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
             };
@@ -2245,17 +2257,19 @@
             
             const title = document.getElementById('task-title').value.trim();
             if (!title) {
-                tg.showPopup({ title: 'Ошибка', message: 'Введите название задачи', buttons: [{ type: 'ok' }] });
+                safeShowPopup('Ошибка', 'Введите название задачи');
                 return;
             }
             
-            const desc = document.getElementById('task-desc').value;
-            const priority = parseInt(document.querySelector('#priority-options .selected')?.dataset.value || 2);
-            const tag = document.querySelector('#tag-options .selected')?.dataset.tag || state.tags[0].name;
+            const desc = document.getElementById('task-desc').value.trim();
+            const priorityEl = document.querySelector('#priority-options .option-btn.selected');
+            const priority = parseInt(priorityEl?.dataset.value || '2');
+            const tagEl = document.querySelector('#tag-options .option-btn.selected');
+            const tag = tagEl?.dataset.tag || (state.tags[0]?.name || 'Прочее');
             const deadline = document.getElementById('task-deadline').value;
             
             const task = {
-                id: Date.now(),
+                id: Date.now() + Math.random(),
                 title, description: desc, priority, tag, deadline,
                 completed: false, createdAt: new Date().toISOString()
             };
@@ -2264,24 +2278,31 @@
             state.user.xp += 10;
             saveState();
             
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            try { safeHaptic('notificationOccurred', 'success'); } catch(e) {}
             showXPPopup(10);
             
             closeModal('task-modal');
             document.getElementById('task-form').reset();
+            // Reset tag/priority selections back to defaults
+            document.querySelectorAll('#priority-options .option-btn').forEach((b, i) => b.classList.toggle('selected', i === 1));
+            const tagBtns = document.querySelectorAll('#tag-options .option-btn');
+            tagBtns.forEach((b, i) => b.classList.toggle('selected', i === 0));
+            
             renderAll();
             
-            await syncTaskToServer(task);
+            syncTaskToServer(task).catch(() => {});
             
             try {
-                tg.sendData(JSON.stringify({
-                    action: 'add_task',
-                    title,
-                    description: desc,
-                    priority,
-                    category: tag,
-                    deadline
-                }));
+                if (tg.initData && tg.initData.length > 0) {
+                    tg.sendData(JSON.stringify({
+                        action: 'add_task',
+                        title,
+                        description: desc,
+                        priority,
+                        category: tag,
+                        deadline
+                    }));
+                }
             } catch(e) {}
         };
 
@@ -2335,7 +2356,14 @@
             renderCalendar();
         }
 
+        let currentCalendarDate = null;
+
         function selectDate(dateStr) {
+            currentCalendarDate = dateStr;
+            renderCalendarTasks(dateStr);
+        }
+
+        function renderCalendarTasks(dateStr) {
             const tasks = state.tasks.filter(t => t.deadline === dateStr && !t.completed);
             const list = document.getElementById('calendar-tasks');
             
@@ -2343,15 +2371,46 @@
                 list.innerHTML = '<div class="empty" style="padding: 30px;"><div class="empty-text">Нет активных задач на эту дату</div></div>';
             } else {
                 list.innerHTML = tasks.map((t) => `
-                    <div class="task-card glass" onclick="viewTaskById(${t.id})">
+                    <div class="task-card glass">
                         <div class="task-top">
-                            <div class="task-check" onclick="event.stopPropagation(); toggleTaskById(${t.id})">✓</div>
+                            <div class="task-check" onclick="calendarToggleTask(${t.id}, '${dateStr}')">✓</div>
                             <div class="task-info">
                                 <div class="task-title">${escapeHtml(t.title)}</div>
+                                <div class="task-desc">${escapeHtml(t.description || '')}</div>
+                            </div>
+                        </div>
+                        <div class="task-bottom">
+                            <div class="task-tags">
+                                <span class="task-tag" style="background: ${getTagColor(t.tag)}20; color: ${getTagColor(t.tag)}">${escapeHtml(t.tag)}</span>
+                            </div>
+                            <div class="task-meta">
+                                <button onclick="calendarDeleteTask(${t.id}, '${dateStr}')" style="background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:4px;">🗑</button>
                             </div>
                         </div>
                     </div>
                 `).join('');
+            }
+        }
+
+        function calendarToggleTask(id, dateStr) {
+            try { safeHaptic('impactOccurred', 'light'); } catch(e) {}
+            const idx = getTaskIndexById(id);
+            if (idx !== -1) {
+                toggleTask(idx);
+                renderCalendarTasks(dateStr);
+                renderCalendar();
+            }
+        }
+
+        function calendarDeleteTask(id, dateStr) {
+            try { safeHaptic('impactOccurred', 'medium'); } catch(e) {}
+            const idx = getTaskIndexById(id);
+            if (idx !== -1) {
+                state.tasks.splice(idx, 1);
+                saveState();
+                renderCalendarTasks(dateStr);
+                renderCalendar();
+                updateLevelUI();
             }
         }
 
@@ -2360,7 +2419,7 @@
             const text = input.value.trim();
             if (!text) return;
             
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            safeHaptic('impactOccurred', 'light');
             
             const messages = document.getElementById('ai-messages');
             messages.innerHTML += `
@@ -2400,7 +2459,7 @@
                     state.tasks.push(newTask);
                     saveState();
                     
-                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    safeHaptic('notificationOccurred', 'success');
                     
                     typing.innerHTML = `
                         <div class="ai-avatar">🧠</div>
@@ -2421,7 +2480,7 @@
                 }
                 
                 messages.scrollTop = messages.scrollHeight;
-            }, 800 + Math.random() * 700);
+            }, 300 + Math.random() * 200);
         }
         
         function escapeHtml(text) {
