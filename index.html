@@ -1328,6 +1328,62 @@
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-8px); }
         }
+
+        /* ===== TELEGRAM AUTH SCREEN ===== */
+        #tg-auth-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 32px; transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        #tg-auth-screen.hide { opacity: 0; transform: scale(1.05); pointer-events: none; }
+        .auth-logo {
+            width: 90px; height: 90px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            border-radius: 28px; display: flex; align-items: center; justify-content: center;
+            font-size: 44px; box-shadow: var(--accent-glow); margin-bottom: 24px;
+            animation: authPulse 2s ease-in-out infinite;
+        }
+        @keyframes authPulse {
+            0%,100% { box-shadow: 0 0 30px rgba(139,92,246,0.5); }
+            50% { box-shadow: 0 0 60px rgba(139,92,246,0.9); }
+        }
+        .auth-title { font-size: 28px; font-weight: 900; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.7)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; text-align: center; }
+        .auth-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 40px; text-align: center; }
+        .auth-user-card {
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 24px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+            width: 100%; max-width: 320px; margin-bottom: 32px;
+        }
+        .auth-avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 900; color: #fff;
+            border: 3px solid rgba(255,255,255,0.2); overflow: hidden;
+        }
+        .auth-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .auth-name { font-size: 20px; font-weight: 700; }
+        .auth-id { font-size: 12px; color: var(--text-muted); }
+        .auth-tg-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(41,182,246,0.15); border: 1px solid rgba(41,182,246,0.3);
+            border-radius: 12px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #29b6f6;
+        }
+        .auth-btn {
+            width: 100%; max-width: 320px; padding: 18px; border: none; border-radius: 18px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: all 0.3s; box-shadow: var(--accent-glow);
+        }
+        .auth-btn:active { transform: scale(0.97); }
+        .auth-guest-btn {
+            margin-top: 12px; background: none; border: 1px solid var(--glass-border);
+            color: var(--text-muted); font-size: 13px; padding: 12px 24px;
+            border-radius: 14px; cursor: pointer; transition: all 0.3s;
+        }
+        .auth-guest-btn:hover { border-color: var(--accent); color: var(--text-primary); }
     </style>
 </head>
 <body>
@@ -1345,6 +1401,21 @@
     <div class="xp-popup" id="xp-popup" style="display: none;">
         <div class="xp-popup-value" id="xp-value">+10 XP</div>
         <div class="xp-popup-label">Отлично!</div>
+    </div>
+
+    <!-- TELEGRAM AUTH SCREEN -->
+    <div id="tg-auth-screen">
+        <div class="auth-logo">🧠</div>
+        <div class="auth-title">MindFlow AI</div>
+        <div class="auth-subtitle">Умный планировщик задач</div>
+        <div class="auth-user-card" id="auth-user-card">
+            <div class="auth-avatar" id="auth-avatar">?</div>
+            <div class="auth-name" id="auth-name">Загрузка...</div>
+            <div class="auth-id" id="auth-uid"></div>
+            <div class="auth-tg-badge" id="auth-tg-badge" style="display:none">✈️ Авторизован через Telegram</div>
+        </div>
+        <button class="auth-btn" id="auth-enter-btn" onclick="authEnter()">🚀 Войти</button>
+        <button class="auth-guest-btn" id="auth-guest-btn" onclick="authGuest()" style="display:none">Продолжить как гость</button>
     </div>
 
     <div class="app">
@@ -1696,8 +1767,57 @@
 
     const telegramUser = tg.initDataUnsafe?.user;
     const USER_ID = telegramUser?.id ? String(telegramUser.id) : 'guest_' + Date.now();
-    const USER_NAME = telegramUser?.first_name || 'Гость';
+    const USER_NAME = telegramUser?.first_name
+        ? (telegramUser.last_name ? telegramUser.first_name + ' ' + telegramUser.last_name : telegramUser.first_name)
+        : 'Гость';
     const API_URL = new URLSearchParams(window.location.search).get('api_url') || '';
+
+    // ===================== AUTH SCREEN =====================
+    function initAuthScreen() {
+        const screen = document.getElementById('tg-auth-screen');
+        const avatarEl = document.getElementById('auth-avatar');
+        const nameEl = document.getElementById('auth-name');
+        const uidEl = document.getElementById('auth-uid');
+        const badge = document.getElementById('auth-tg-badge');
+        const guestBtn = document.getElementById('auth-guest-btn');
+
+        if (telegramUser) {
+            // Authenticated via Telegram
+            nameEl.textContent = USER_NAME;
+            uidEl.textContent = telegramUser.username ? '@' + telegramUser.username : 'ID: ' + telegramUser.id;
+            badge.style.display = 'flex';
+            guestBtn.style.display = 'none';
+            // Try to load photo
+            if (telegramUser.photo_url) {
+                avatarEl.innerHTML = '<img src="' + telegramUser.photo_url + '" alt="avatar" onerror="this.parentNode.textContent=\'' + USER_NAME.charAt(0).toUpperCase() + '\'">';
+            } else {
+                avatarEl.textContent = USER_NAME.charAt(0).toUpperCase();
+            }
+        } else {
+            // Not in Telegram
+            nameEl.textContent = 'Гость';
+            uidEl.textContent = 'Откройте в Telegram для полного доступа';
+            badge.style.display = 'none';
+            guestBtn.style.display = 'block';
+            avatarEl.textContent = '👤';
+        }
+    }
+
+    function authEnter() {
+        safeHaptic('impactOccurred', 'medium');
+        const screen = document.getElementById('tg-auth-screen');
+        screen.classList.add('hide');
+        setTimeout(() => { screen.style.display = 'none'; }, 500);
+        loadState();
+        syncWithServer();
+    }
+
+    function authGuest() {
+        authEnter();
+    }
+
+    // Init auth screen immediately
+    initAuthScreen();
 
     // ===================== HELPERS =====================
     function safeHaptic(type, val) {
@@ -1747,9 +1867,10 @@
             { name: 'Прочитать', emoji: '📚', tag: 'Учёба', priority: 3 }
         ],
         user: { xp: 0, level: 1, streak: 0, completed: 0, premium: false, theme: 'glass', lastActivity: null },
-        calendarDate: new Date().toISOString(),
-        charts: {}
+        calendarDate: new Date().toISOString()
     };
+    // Charts stored separately — never serialized to localStorage
+    const _charts = {};
     let selectedPlan = 'year';
     let selectedTagColor = TAG_COLORS[0];
     let currentCalendarDate = null;
@@ -1771,7 +1892,7 @@
                 state.user.theme = state.user.theme || 'glass';
                 state.user.lastActivity = state.user.lastActivity || null;
                 if (!Array.isArray(state.tasks)) state.tasks = [];
-                state.tasks = state.tasks.map(t => ({ ...t, id: t.id || (Date.now() + Math.random()) }));
+                state.tasks = state.tasks.map(t => ({ ...t, id: t.id ? String(t.id) : String(Date.now() + Math.random()) }));
                 if (!Array.isArray(state.tags)) state.tags = [...DEFAULT_TAGS];
             }
         } catch(e) { console.log('Load error', e); }
@@ -1877,6 +1998,8 @@
         renderTags();
         renderThemes();
         renderCalendar();
+        const aiName = document.getElementById('ai-user-name');
+        if (aiName) aiName.textContent = state.userName;
     }
 
     // ===================== TASKS =====================
@@ -2269,8 +2392,8 @@
         if (!ctx1 || !ctx2) return;
 
         // Destroy old charts if exist
-        if (state.charts.activity) { state.charts.activity.destroy(); state.charts.activity = null; }
-        if (state.charts.category) { state.charts.category.destroy(); state.charts.category = null; }
+        if (_charts.activity) { _charts.activity.destroy(); _charts.activity = null; }
+        if (_charts.category) { _charts.category.destroy(); _charts.category = null; }
 
         const labels = [], data = [];
         for (let i = 6; i >= 0; i--) {
@@ -2279,7 +2402,7 @@
             const dayStr = d.toISOString().split('T')[0];
             data.push(state.tasks.filter(t => t.completedAt?.startsWith(dayStr)).length);
         }
-        state.charts.activity = new Chart(ctx1, {
+        _charts.activity = new Chart(ctx1, {
             type: 'line',
             data: { labels, datasets: [{ label: 'Задачи', data, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)', fill: true, tension: 0.4 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
@@ -2290,7 +2413,7 @@
         const tagData = {};
         state.tasks.filter(t => t.completed).forEach(t => { tagData[t.tag] = (tagData[t.tag] || 0) + 1; });
         if (Object.keys(tagData).length === 0) tagData['Нет данных'] = 1;
-        state.charts.category = new Chart(ctx2, {
+        _charts.category = new Chart(ctx2, {
             type: 'doughnut',
             data: { labels: Object.keys(tagData), datasets: [{ data: Object.values(tagData), backgroundColor: ['#8b5cf6','#ef4444','#10b981','#f59e0b','#0ea5e9'] }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)' } } } }
@@ -2342,7 +2465,7 @@
             const response = processAICommand(text);
             if (response.createTask) {
                 const newTask = {
-                    id: Date.now() + Math.random(),
+                    id: String(Date.now()),
                     title: response.title,
                     description: response.description || '',
                     priority: response.priority || 2,
@@ -2449,7 +2572,7 @@
             const tag = tagEl?.dataset.tag || (state.tags[0]?.name || 'Прочее');
             const deadline = document.getElementById('task-deadline').value;
 
-            const task = { id: Date.now() + Math.random(), title, description: desc, priority, tag, deadline: deadline || null, completed: false, createdAt: new Date().toISOString() };
+            const task = { id: String(Date.now()), title, description: desc, priority, tag, deadline: deadline || null, completed: false, createdAt: new Date().toISOString() };
             state.tasks.push(task);
             state.user.xp = (state.user.xp || 0) + 10;
             saveState();
@@ -2495,10 +2618,6 @@
     initNav();
     initTaskForm();
     initModals();
-    loadState();
-    syncWithServer();
-
-    document.getElementById('ai-user-name').textContent = state.userName;
     </script>
 </body>
 </html>
