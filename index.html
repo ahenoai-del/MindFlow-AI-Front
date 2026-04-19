@@ -646,8 +646,6 @@
 
         .calendar-day.today.has-tasks::after { background: #fff; }
 
-        .calendar-day.selected-day { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-
         .calendar-day-num {
             font-size: 13px;
             font-weight: 600;
@@ -1328,62 +1326,6 @@
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-8px); }
         }
-
-        /* ===== TELEGRAM AUTH SCREEN ===== */
-        #tg-auth-screen {
-            position: fixed; inset: 0; z-index: 9999;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 32px; transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        #tg-auth-screen.hide { opacity: 0; transform: scale(1.05); pointer-events: none; }
-        .auth-logo {
-            width: 90px; height: 90px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            border-radius: 28px; display: flex; align-items: center; justify-content: center;
-            font-size: 44px; box-shadow: var(--accent-glow); margin-bottom: 24px;
-            animation: authPulse 2s ease-in-out infinite;
-        }
-        @keyframes authPulse {
-            0%,100% { box-shadow: 0 0 30px rgba(139,92,246,0.5); }
-            50% { box-shadow: 0 0 60px rgba(139,92,246,0.9); }
-        }
-        .auth-title { font-size: 28px; font-weight: 900; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.7)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; text-align: center; }
-        .auth-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 40px; text-align: center; }
-        .auth-user-card {
-            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border); border-radius: 24px;
-            padding: 24px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px;
-            width: 100%; max-width: 320px; margin-bottom: 32px;
-        }
-        .auth-avatar {
-            width: 72px; height: 72px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 32px; font-weight: 900; color: #fff;
-            border: 3px solid rgba(255,255,255,0.2); overflow: hidden;
-        }
-        .auth-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .auth-name { font-size: 20px; font-weight: 700; }
-        .auth-id { font-size: 12px; color: var(--text-muted); }
-        .auth-tg-badge {
-            display: flex; align-items: center; gap: 8px;
-            background: rgba(41,182,246,0.15); border: 1px solid rgba(41,182,246,0.3);
-            border-radius: 12px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #29b6f6;
-        }
-        .auth-btn {
-            width: 100%; max-width: 320px; padding: 18px; border: none; border-radius: 18px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
-            transition: all 0.3s; box-shadow: var(--accent-glow);
-        }
-        .auth-btn:active { transform: scale(0.97); }
-        .auth-guest-btn {
-            margin-top: 12px; background: none; border: 1px solid var(--glass-border);
-            color: var(--text-muted); font-size: 13px; padding: 12px 24px;
-            border-radius: 14px; cursor: pointer; transition: all 0.3s;
-        }
-        .auth-guest-btn:hover { border-color: var(--accent); color: var(--text-primary); }
     </style>
 </head>
 <body>
@@ -1401,21 +1343,6 @@
     <div class="xp-popup" id="xp-popup" style="display: none;">
         <div class="xp-popup-value" id="xp-value">+10 XP</div>
         <div class="xp-popup-label">Отлично!</div>
-    </div>
-
-    <!-- TELEGRAM AUTH SCREEN -->
-    <div id="tg-auth-screen">
-        <div class="auth-logo">🧠</div>
-        <div class="auth-title">MindFlow AI</div>
-        <div class="auth-subtitle">Умный планировщик задач</div>
-        <div class="auth-user-card" id="auth-user-card">
-            <div class="auth-avatar" id="auth-avatar">?</div>
-            <div class="auth-name" id="auth-name">Загрузка...</div>
-            <div class="auth-id" id="auth-uid"></div>
-            <div class="auth-tg-badge" id="auth-tg-badge" style="display:none">✈️ Авторизован через Telegram</div>
-        </div>
-        <button class="auth-btn" id="auth-enter-btn" onclick="authEnter()">🚀 Войти</button>
-        <button class="auth-guest-btn" id="auth-guest-btn" onclick="authGuest()" style="display:none">Продолжить как гость</button>
     </div>
 
     <div class="app">
@@ -1472,6 +1399,7 @@
         <div class="nav-pills">
             <div class="nav-pill active" data-section="tasks">📋 Задачи</div>
             <div class="nav-pill" data-section="calendar">📅 Календарь</div>
+            <div class="nav-pill" data-section="reminders">🔔</div>
             <div class="nav-pill" data-section="ai">🤖 AI</div>
             <div class="nav-pill" data-section="analytics">📊 Аналитика</div>
             <div class="nav-pill" data-section="settings">⚙️</div>
@@ -1482,10 +1410,18 @@
             <div class="templates-section">
                 <div class="section-title">⚡ Быстрое создание</div>
                 <div class="templates-scroll" id="templates-scroll"></div>
+                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                    <div class="template-chip" onclick="quickDeadline('today')">📅 Сегодня</div>
+                    <div class="template-chip" onclick="quickDeadline('tomorrow')">📅 Завтра</div>
+                    <div class="template-chip" onclick="quickDeadline('week')">📅 На неделю</div>
+                </div>
             </div>
 
             <div class="task-list" id="task-list"></div>
 
+            <div style="position:fixed;bottom:100px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99;">
+                <button class="icon-btn" style="width:50px;height:50px;font-size:22px;" onclick="startVoiceInput()" id="voice-btn">🎤</button>
+            </div>
             <button class="fab" onclick="openModal('task-modal')">+</button>
         </div>
 
@@ -1501,6 +1437,17 @@
             </div>
             <div class="calendar-grid" id="calendar-grid"></div>
             <div class="task-list" id="calendar-tasks" style="margin-top: 16px;"></div>
+        </div>
+
+        <!-- Reminders Section -->
+        <div class="section" id="section-reminders">
+            <div class="ai-card glass">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div style="font-size:18px;font-weight:700;">🔔 Напоминания</div>
+                    <button class="icon-btn" style="width:40px;height:40px;font-size:18px;" onclick="openModal('reminder-modal')">+</button>
+                </div>
+                <div id="reminders-list"></div>
+            </div>
         </div>
 
         <!-- AI Section -->
@@ -1755,134 +1702,254 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="reminder-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">🔔 Новое напоминание</div>
+                <button class="modal-close" onclick="closeModal('reminder-modal')">✕</button>
+            </div>
+            <form id="reminder-form">
+                <div class="form-group">
+                    <label class="form-label">Текст напоминания</label>
+                    <input type="text" class="form-input" id="reminder-text" required placeholder="О чём напомнить?">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Когда напомнить</label>
+                    <input type="datetime-local" class="form-input" id="reminder-datetime" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Повтор</label>
+                    <div class="option-grid" id="repeat-options">
+                        <div class="option-btn selected" data-value="">Без повтора</div>
+                        <div class="option-btn" data-value="daily">Ежедневно</div>
+                        <div class="option-btn" data-value="weekly">Еженедельно</div>
+                        <div class="option-btn" data-value="monthly">Ежемесячно</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                    <div class="template-chip" onclick="setReminderQuick('today')">Сегодня</div>
+                    <div class="template-chip" onclick="setReminderQuick('tomorrow')">Завтра</div>
+                    <div class="template-chip" onclick="setReminderQuick('1h')">Через 1ч</div>
+                    <div class="template-chip" onclick="setReminderQuick('3h')">Через 3ч</div>
+                </div>
+                <button type="submit" class="btn">🔔 Создать</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Voice Recording Indicator -->
+    <div class="modal-overlay" id="voice-modal">
+        <div class="modal" style="text-align:center;padding:40px;">
+            <div style="font-size:60px;margin-bottom:20px;">🎤</div>
+            <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Запись...</div>
+            <div style="color:var(--text-muted);margin-bottom:20px;">Говори задачу</div>
+            <div class="typing" style="justify-content:center;"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+            <button class="btn btn-danger" style="margin-top:20px;" onclick="stopVoiceInput()">⏹ Остановить</button>
+        </div>
+    </div>
+
     <script>
-    // ===================== TELEGRAM INIT (SAFE) =====================
-    const tg = window.Telegram?.WebApp || {
-        expand: ()=>{}, ready: ()=>{}, initDataUnsafe: {}, initData: '',
-        HapticFeedback: null, sendData: ()=>{},
-        showPopup: (o) => alert((o.title||'') + (o.message ? '\n'+o.message : ''))
-    };
-    tg.expand();
-    tg.ready();
-
-    const telegramUser = tg.initDataUnsafe?.user;
-    const USER_ID = telegramUser?.id ? String(telegramUser.id) : 'guest_' + Date.now();
-    const USER_NAME = telegramUser?.first_name
-        ? (telegramUser.last_name ? telegramUser.first_name + ' ' + telegramUser.last_name : telegramUser.first_name)
-        : 'Гость';
-    const API_URL = new URLSearchParams(window.location.search).get('api_url') || '';
-
-    // ===================== AUTH SCREEN =====================
-    function initAuthScreen() {
-        const screen = document.getElementById('tg-auth-screen');
-        const avatarEl = document.getElementById('auth-avatar');
-        const nameEl = document.getElementById('auth-name');
-        const uidEl = document.getElementById('auth-uid');
-        const badge = document.getElementById('auth-tg-badge');
-        const guestBtn = document.getElementById('auth-guest-btn');
-
-        if (telegramUser) {
-            // Authenticated via Telegram
-            nameEl.textContent = USER_NAME;
-            uidEl.textContent = telegramUser.username ? '@' + telegramUser.username : 'ID: ' + telegramUser.id;
-            badge.style.display = 'flex';
-            guestBtn.style.display = 'none';
-            // Try to load photo
-            if (telegramUser.photo_url) {
-                avatarEl.innerHTML = '<img src="' + telegramUser.photo_url + '" alt="avatar" onerror="this.parentNode.textContent=\'' + USER_NAME.charAt(0).toUpperCase() + '\'">';
-            } else {
-                avatarEl.textContent = USER_NAME.charAt(0).toUpperCase();
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        const telegramUser = tg.initDataUnsafe?.user;
+        const USER_ID = telegramUser?.id || 'guest_' + Date.now();
+        const USER_NAME = telegramUser?.first_name || 'Гость';
+        const API_URL = new URLSearchParams(window.location.search).get('api_url') || '';
+        
+        async function syncWithServer() {
+            if (!API_URL || USER_ID.startsWith('guest_')) return;
+            
+            try {
+                const [userRes, tasksRes] = await Promise.all([
+                    fetch(`${API_URL}/api/user/${USER_ID}`),
+                    fetch(`${API_URL}/api/tasks/${USER_ID}`)
+                ]);
+                
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    if (userData.xp !== undefined) state.user.xp = userData.xp;
+                    if (userData.level !== undefined) state.user.level = userData.level;
+                    if (userData.streak !== undefined) state.user.streak = userData.streak;
+                    if (userData.total_completed !== undefined) state.user.completed = userData.total_completed;
+                    state.user.premium = userData.is_premium === true;
+                    state.user.premium_until = userData.premium_until || null;
+                }
+                
+                if (tasksRes.ok) {
+                    const tasksData = await tasksRes.json();
+                    const serverTaskIds = new Set(tasksData.map(t => t.id));
+                    const localOnlyTasks = state.tasks.filter(t => !serverTaskIds.has(t.id));
+                    
+                    state.tasks = [
+                        ...tasksData.map(t => ({
+                            id: t.id,
+                            title: t.title,
+                            description: t.description || '',
+                            priority: t.priority,
+                            tag: t.category,
+                            deadline: t.deadline,
+                            completed: t.status === 'completed',
+                            completedAt: t.completed_at,
+                            createdAt: t.created_at
+                        })),
+                        ...localOnlyTasks
+                    ];
+                }
+                
+                saveState();
+                renderAll();
+            } catch (e) {
+                console.log('Sync error:', e);
             }
-        } else {
-            // Not in Telegram
-            nameEl.textContent = 'Гость';
-            uidEl.textContent = 'Откройте в Telegram для полного доступа';
-            badge.style.display = 'none';
-            guestBtn.style.display = 'block';
-            avatarEl.textContent = '👤';
         }
-    }
+        
+        async function syncPremiumStatus() {
+            if (!API_URL || USER_ID.startsWith('guest_')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/user/${USER_ID}/premium`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const wasPremium = state.user.premium;
+                    state.user.premium = data.is_premium === true;
+                    state.user.premium_until = data.premium_until || null;
+                    if (!wasPremium && state.user.premium) {
+                        saveState();
+                        renderAll();
+                        createConfetti();
+                        showXPPopup('PRO!');
+                        tg.showPopup({ title: '🎉 Premium активирован!', message: 'MindFlow Pro теперь доступен!', buttons: [{ type: 'ok' }] });
+                        stopPremiumPolling();
+                    }
+                    saveState();
+                    renderAll();
+                }
+            } catch (e) {
+                console.log('Premium sync error:', e);
+            }
+        }
+        
+        async function syncTaskToServer(task) {
+            if (!API_URL || USER_ID.startsWith('guest_')) return;
+            
+            try {
+                await fetch(`${API_URL}/api/tasks/${USER_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: task.title,
+                        description: task.description,
+                        category: task.tag,
+                        priority: task.priority,
+                        deadline: task.deadline
+                    })
+                });
+            } catch (e) {
+                console.log('Task sync error:', e);
+            }
+        }
+        
+        async function completeTaskOnServer(taskId) {
+            if (!API_URL || USER_ID.startsWith('guest_')) return;
+            
+            try {
+                await fetch(`${API_URL}/api/tasks/${taskId}/complete`, { method: 'POST' });
+            } catch (e) {
+                console.log('Complete sync error:', e);
+            }
+        }
+        
+        // Handle events from bot
+        tg.onEvent('customEvent', (event) => {
+            if (event.detail?.action === 'premium_activated') {
+                state.user.premium = true;
+                saveState();
+                renderAll();
+            }
+        });
+        
+        // Check premium from URL params (bot can pass it)
+        const urlParams = new URLSearchParams(window.location.search);
+        const premiumParam = urlParams.get('premium');
+        if (premiumParam === '1' || premiumParam === 'true') {
+            state.user.premium = true;
+        }
+        
+        // Premium status polling
+        let premiumCheckInterval = null;
+        function startPremiumPolling() {
+            if (!API_URL || premiumCheckInterval) return;
+            premiumCheckInterval = setInterval(syncPremiumStatus, 10000);
+        }
+        function stopPremiumPolling() {
+            if (premiumCheckInterval) {
+                clearInterval(premiumCheckInterval);
+                premiumCheckInterval = null;
+            }
+        }
+        
+        tg.onEvent('viewportChanged', () => {
+            syncPremiumStatus();
+        });
 
-    function authEnter() {
-        safeHaptic('impactOccurred', 'medium');
-        const screen = document.getElementById('tg-auth-screen');
-        screen.classList.add('hide');
-        setTimeout(() => { screen.style.display = 'none'; }, 500);
-        loadState();
-        syncWithServer();
-    }
+        const LEVELS = [0, 100, 250, 500, 1000, 2000, 4000, 8000, 15000, 30000];
+        const DEFAULT_TAGS = [
+            { name: 'Работа', color: '#8b5cf6', emoji: '💼' },
+            { name: 'Дом', color: '#ef4444', emoji: '🏠' },
+            { name: 'Учёба', color: '#10b981', emoji: '📚' },
+            { name: 'Спорт', color: '#f59e0b', emoji: '💪' },
+            { name: 'Прочее', color: '#64748b', emoji: '🎯' }
+        ];
+        const TAG_COLORS = ['#8b5cf6', '#ef4444', '#10b981', '#f59e0b', '#0ea5e9', '#ec4899', '#6366f1', '#14b8a6'];
+        
+        const THEMES = [
+            { id: 'glass', name: '🔮 Glass', desc: 'Стекло', free: true, styles: {} },
+            { id: 'neon', name: '⚡ Neon', desc: 'Неон', free: false, styles: {
+                '--accent': '#00ff88', '--accent-glow': '0 0 30px rgba(0, 255, 136, 0.5)'
+            }},
+            { id: 'brutal', name: '🧱 Brutal', desc: 'Брутализм', free: false, styles: {
+                '--accent': '#ff3333', '--glass-bg': 'rgba(255,255,255,0.08)', '--glass-border': 'rgba(255,255,255,0.2)'
+            }},
+            { id: 'fluid', name: '🌊 Fluid', desc: 'Плавный', free: false, styles: {
+                '--accent': '#0ea5e9', '--glass-border-radius': '30px'
+            }},
+            { id: 'dark-purple', name: '💜 Purple', desc: 'Фиолет', free: false, styles: {
+                '--accent': '#a855f7'
+            }},
+            { id: 'gold', name: '✨ Gold', desc: 'Золото', free: false, styles: {
+                '--accent': '#fbbf24', '--accent-glow': '0 0 30px rgba(251, 191, 36, 0.5)'
+            }}
+        ];
 
-    function authGuest() {
-        authEnter();
-    }
+        let state = {
+            userId: USER_ID,
+            userName: USER_NAME,
+            tasks: [],
+            tags: [...DEFAULT_TAGS],
+            templates: [
+                { name: 'Встреча', emoji: '💼', tag: 'Работа', priority: 1 },
+                { name: 'Звонок', emoji: '📞', tag: 'Работа', priority: 2 },
+                { name: 'Отчёт', emoji: '📊', tag: 'Работа', priority: 1 },
+                { name: 'Тренировка', emoji: '💪', tag: 'Спорт', priority: 2 },
+                { name: 'Прочитать', emoji: '📚', tag: 'Учёба', priority: 3 }
+            ],
+            user: { xp: 0, level: 1, streak: 0, completed: 0, premium: false, theme: 'glass' },
+            calendar: new Date(),
+            charts: {}
+        };
 
-    // Init auth screen immediately
-    initAuthScreen();
+        let selectedPlan = 'year';
 
-    // ===================== HELPERS =====================
-    function safeHaptic(type, val) {
-        try { if (tg.HapticFeedback) tg.HapticFeedback[type]?.(val); } catch(e) {}
-    }
-    function safeShowPopup(title, message) {
-        try { tg.showPopup({ title, message, buttons: [{ type: 'ok' }] }); }
-        catch(e) { alert(title + '\n' + message); }
-    }
-    function escapeHtml(text) {
-        if (!text) return '';
-        const d = document.createElement('div');
-        d.textContent = text;
-        return d.innerHTML;
-    }
-
-    // ===================== CONSTANTS =====================
-    const LEVELS = [0, 100, 250, 500, 1000, 2000, 4000, 8000, 15000, 30000];
-    const DEFAULT_TAGS = [
-        { name: 'Работа', color: '#8b5cf6', emoji: '💼' },
-        { name: 'Дом', color: '#ef4444', emoji: '🏠' },
-        { name: 'Учёба', color: '#10b981', emoji: '📚' },
-        { name: 'Спорт', color: '#f59e0b', emoji: '💪' },
-        { name: 'Прочее', color: '#64748b', emoji: '🎯' }
-    ];
-    const TAG_COLORS = ['#8b5cf6','#ef4444','#10b981','#f59e0b','#0ea5e9','#ec4899','#6366f1','#14b8a6'];
-    const THEMES = [
-        { id: 'glass', name: '🔮 Glass', desc: 'Стекло', free: true, styles: {} },
-        { id: 'neon', name: '⚡ Neon', desc: 'Неон', free: false, styles: { '--accent': '#00ff88', '--accent-glow': '0 0 30px rgba(0,255,136,0.5)' }},
-        { id: 'brutal', name: '🧱 Brutal', desc: 'Брутализм', free: false, styles: { '--accent': '#ff3333', '--glass-bg': 'rgba(255,255,255,0.08)', '--glass-border': 'rgba(255,255,255,0.2)' }},
-        { id: 'fluid', name: '🌊 Fluid', desc: 'Плавный', free: false, styles: { '--accent': '#0ea5e9' }},
-        { id: 'dark-purple', name: '💜 Purple', desc: 'Фиолет', free: false, styles: { '--accent': '#a855f7' }},
-        { id: 'gold', name: '✨ Gold', desc: 'Золото', free: false, styles: { '--accent': '#fbbf24', '--accent-glow': '0 0 30px rgba(251,191,36,0.5)' }}
-    ];
-
-    // ===================== STATE =====================
-    let state = {
-        userId: USER_ID,
-        userName: USER_NAME,
-        tasks: [],
-        tags: [...DEFAULT_TAGS],
-        templates: [
-            { name: 'Встреча', emoji: '💼', tag: 'Работа', priority: 1 },
-            { name: 'Звонок', emoji: '📞', tag: 'Работа', priority: 2 },
-            { name: 'Отчёт', emoji: '📊', tag: 'Работа', priority: 1 },
-            { name: 'Тренировка', emoji: '💪', tag: 'Спорт', priority: 2 },
-            { name: 'Прочитать', emoji: '📚', tag: 'Учёба', priority: 3 }
-        ],
-        user: { xp: 0, level: 1, streak: 0, completed: 0, premium: false, theme: 'glass', lastActivity: null },
-        calendarDate: new Date().toISOString()
-    };
-    // Charts stored separately — never serialized to localStorage
-    const _charts = {};
-    let selectedPlan = 'year';
-    let selectedTagColor = TAG_COLORS[0];
-    let currentCalendarDate = null;
-
-    // ===================== STORAGE =====================
-    function loadState() {
-        try {
-            const key = 'mindflow_' + USER_ID;
-            const saved = localStorage.getItem(key);
+        function loadState() {
+            const storageKey = `mindflow_${USER_ID}`;
+            const saved = localStorage.getItem(storageKey);
             if (saved) {
                 const parsed = JSON.parse(saved);
                 state = { ...state, ...parsed, userId: USER_ID, userName: USER_NAME };
+                state.calendar = new Date(state.calendar || Date.now());
+                
+                // Миграция - убедимся что все поля существуют
                 if (!state.user) state.user = {};
                 state.user.xp = state.user.xp || 0;
                 state.user.level = state.user.level || 1;
@@ -1890,734 +1957,996 @@
                 state.user.completed = state.user.completed || 0;
                 state.user.premium = state.user.premium || false;
                 state.user.theme = state.user.theme || 'glass';
-                state.user.lastActivity = state.user.lastActivity || null;
-                if (!Array.isArray(state.tasks)) state.tasks = [];
-                state.tasks = state.tasks.map(t => ({ ...t, id: t.id ? String(t.id) : String(Date.now() + Math.random()) }));
-                if (!Array.isArray(state.tags)) state.tags = [...DEFAULT_TAGS];
+                
+                // Убедимся что у задач есть id
+                state.tasks = state.tasks.map(t => ({
+                    ...t,
+                    id: t.id || Date.now() + Math.random()
+                }));
             }
-        } catch(e) { console.log('Load error', e); }
-
-        // Check premium from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('premium') === '1' || urlParams.get('premium') === 'true') {
-            state.user.premium = true;
-        }
-
-        // Apply saved theme
-        applyTheme(state.user.theme);
-        renderAll();
-    }
-
-    function saveState() {
-        try {
-            localStorage.setItem('mindflow_' + USER_ID, JSON.stringify(state));
-        } catch(e) {}
-    }
-
-    // ===================== SERVER SYNC =====================
-    async function syncWithServer() {
-        if (!API_URL || USER_ID.startsWith('guest_')) return;
-        try {
-            const [userRes, tasksRes] = await Promise.all([
-                fetch(API_URL + '/api/user/' + USER_ID),
-                fetch(API_URL + '/api/tasks/' + USER_ID)
-            ]);
-            if (userRes.ok) {
-                const u = await userRes.json();
-                state.user.xp = u.xp || state.user.xp;
-                state.user.level = u.level || state.user.level;
-                state.user.streak = u.streak || state.user.streak;
-                state.user.completed = u.total_completed || state.user.completed;
-                state.user.premium = u.is_premium || state.user.premium;
-            }
-            if (tasksRes.ok) {
-                const serverTasks = await tasksRes.json();
-                const serverIds = new Set(serverTasks.map(t => t.id));
-                const localOnly = state.tasks.filter(t => !serverIds.has(t.id));
-                state.tasks = [
-                    ...serverTasks.map(t => ({
-                        id: t.id, title: t.title, description: t.description || '',
-                        priority: t.priority, tag: t.category, deadline: t.deadline,
-                        completed: t.status === 'completed', completedAt: t.completed_at,
-                        createdAt: t.created_at
-                    })),
-                    ...localOnly
-                ];
-            }
-            saveState();
             renderAll();
-        } catch(e) { console.log('Sync error', e); }
-    }
-
-    async function syncTaskToServer(task) {
-        if (!API_URL || USER_ID.startsWith('guest_')) return;
-        try {
-            await fetch(API_URL + '/api/tasks/' + USER_ID, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: task.title, description: task.description, category: task.tag, priority: task.priority, deadline: task.deadline })
-            });
-        } catch(e) {}
-    }
-
-    async function completeTaskOnServer(taskId) {
-        if (!API_URL || USER_ID.startsWith('guest_')) return;
-        try { await fetch(API_URL + '/api/tasks/' + taskId + '/complete', { method: 'POST' }); } catch(e) {}
-    }
-
-    // ===================== LEVEL =====================
-    function getLevel(xp) {
-        for (let i = LEVELS.length - 1; i >= 0; i--) {
-            if (xp >= LEVELS[i]) return i + 1;
         }
-        return 1;
-    }
 
-    function updateLevelUI() {
-        const level = getLevel(state.user.xp);
-        state.user.level = level;
-        document.getElementById('level-num').textContent = level;
-        document.getElementById('level-circle').textContent = level;
-        document.getElementById('level-text').textContent = level;
-        const current = LEVELS[level - 1] || 0;
-        const next = LEVELS[level] || LEVELS[LEVELS.length - 1];
-        const progress = level >= 10 ? 100 : ((state.user.xp - current) / (next - current)) * 100;
-        document.getElementById('xp-fill').style.width = Math.max(0, Math.min(100, progress)) + '%';
-        document.getElementById('xp-text').textContent = (state.user.xp || 0) + ' / ' + next + ' XP';
-        document.getElementById('completed-count').textContent = state.user.completed || 0;
-        document.getElementById('streak-value').textContent = state.user.streak || 0;
-        document.getElementById('pending-count').textContent = state.tasks.filter(t => !t.completed).length;
-        document.getElementById('premium-badge').textContent = state.user.premium ? 'PRO ✓' : 'PRO';
-    }
-
-    // ===================== RENDER ALL =====================
-    function renderAll() {
-        updateLevelUI();
-        renderTasks();
-        renderTemplates();
-        renderTags();
-        renderThemes();
-        renderCalendar();
-        const aiName = document.getElementById('ai-user-name');
-        if (aiName) aiName.textContent = state.userName;
-    }
-
-    // ===================== TASKS =====================
-    function getTagColor(tagName) {
-        const tag = state.tags.find(t => t.name === tagName);
-        return tag?.color || '#8b5cf6';
-    }
-
-    function getTaskById(id) {
-        return state.tasks.find(t => t.id == id);
-    }
-
-    function renderTasks() {
-        const list = document.getElementById('task-list');
-        const pending = state.tasks.filter(t => !t.completed);
-        if (pending.length === 0) {
-            list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Нет задач</div><div class="empty-text">Нажми + чтобы добавить</div></div>';
-            return;
+        function saveState() {
+            const storageKey = `mindflow_${USER_ID}`;
+            localStorage.setItem(storageKey, JSON.stringify(state));
         }
-        list.innerHTML = pending.map(task => `
-            <div class="task-card glass" onclick="viewTask(${task.id})">
-                <div class="task-top">
-                    <div class="task-check" onclick="event.stopPropagation(); toggleTask(${task.id})">✓</div>
-                    <div class="task-info">
-                        <div class="task-title">${escapeHtml(task.title)}</div>
-                        <div class="task-desc">${escapeHtml(task.description || '')}</div>
-                    </div>
-                </div>
-                <div class="task-bottom">
-                    <div class="task-tags">
-                        <span class="task-tag" style="background:${getTagColor(task.tag)}20;color:${getTagColor(task.tag)}">${escapeHtml(task.tag || '')}</span>
-                    </div>
-                    <div class="task-meta">
-                        ${task.deadline ? '<span class="task-meta-item">📅 ' + task.deadline + '</span>' : ''}
-                        <span class="task-meta-item">${['🔴','🟡','🟢'][(task.priority||2)-1]}</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
 
-    function toggleTask(id) {
-        safeHaptic('impactOccurred', 'light');
-        const task = getTaskById(id);
-        if (!task) return;
-        if (!task.completed) {
-            task.completed = true;
-            task.completedAt = new Date().toISOString();
-            state.user.completed = (state.user.completed || 0) + 1;
-            const xpGain = [20, 10, 5][(task.priority || 2) - 1];
-            state.user.xp = (state.user.xp || 0) + xpGain;
-            const today = new Date().toDateString();
-            if (state.user.lastActivity !== today) {
-                const yesterday = new Date(Date.now() - 86400000).toDateString();
-                state.user.streak = state.user.lastActivity === yesterday ? (state.user.streak || 0) + 1 : 1;
-                state.user.lastActivity = today;
+        function getLevel(xp) {
+            for (let i = LEVELS.length - 1; i >= 0; i--) {
+                if (xp >= LEVELS[i]) return i + 1;
             }
-            saveState();
-            showXPPopup(xpGain);
-            createConfetti();
-            completeTaskOnServer(task.id);
-        } else {
-            task.completed = false;
-            task.completedAt = null;
-            state.user.completed = Math.max(0, (state.user.completed || 0) - 1);
-            saveState();
+            return 1;
         }
-        renderAll();
-    }
 
-    function deleteTask(id) {
-        const idx = state.tasks.findIndex(t => t.id == id);
-        if (idx !== -1) {
-            state.tasks.splice(idx, 1);
-            saveState();
+        function updateLevelUI() {
+            const level = getLevel(state.user.xp);
+            state.user.level = level;
+            
+            document.getElementById('level-num').textContent = level;
+            document.getElementById('level-circle').textContent = level;
+            document.getElementById('level-text').textContent = level;
+            
+            const current = LEVELS[level - 1] || 0;
+            const next = LEVELS[level] || LEVELS[LEVELS.length - 1];
+            const progress = level >= 10 ? 100 : ((state.user.xp - current) / (next - current)) * 100;
+            
+            document.getElementById('xp-fill').style.width = progress + '%';
+            document.getElementById('xp-text').textContent = `${state.user.xp || 0} / ${next} XP`;
+            document.getElementById('completed-count').textContent = state.user.completed || 0;
+            document.getElementById('streak-value').textContent = state.user.streak || 0;
+            document.getElementById('pending-count').textContent = state.tasks.filter(t => !t.completed).length;
+            
+            if (state.user.premium) {
+                document.getElementById('premium-badge').textContent = 'PRO ✓';
+            }
         }
-        closeModal('view-modal');
-        renderAll();
-    }
 
-    function viewTask(id) {
-        safeHaptic('impactOccurred', 'medium');
-        const task = getTaskById(id);
-        if (!task) return;
-        document.getElementById('view-title').textContent = task.title;
-        document.getElementById('view-desc').textContent = task.description || '—';
-        document.getElementById('view-priority').textContent = ['Высокий','Средний','Низкий'][(task.priority||2)-1];
-        document.getElementById('view-tag').textContent = task.tag || '—';
-        document.getElementById('view-complete').onclick = () => { closeModal('view-modal'); toggleTask(id); };
-        document.getElementById('view-delete').onclick = () => deleteTask(id);
-        document.getElementById('view-complete').textContent = task.completed ? '↩ Вернуть' : '✓ Выполнить';
-        openModal('view-modal');
-    }
-
-    // ===================== TEMPLATES =====================
-    function renderTemplates() {
-        const scroll = document.getElementById('templates-scroll');
-        if (!scroll) return;
-        scroll.innerHTML = state.templates.map(t =>
-            `<div class="template-chip" onclick="createFromTemplate('${escapeHtml(t.name)}','${escapeHtml(t.tag)}',${t.priority})">${t.emoji} ${escapeHtml(t.name)}</div>`
-        ).join('') + `<div class="template-chip template-add" onclick="openModal('templates-modal')">+ Свой</div>`;
-    }
-
-    function createFromTemplate(name, tag, priority) {
-        document.getElementById('task-title').value = name;
-        document.querySelectorAll('#priority-options .option-btn').forEach(b => b.classList.toggle('selected', b.dataset.value == priority));
-        document.querySelectorAll('#tag-options .option-btn').forEach(b => b.classList.toggle('selected', b.dataset.tag === tag));
-        openModal('task-modal');
-    }
-
-    function addTemplate() {
-        const name = document.getElementById('new-template-name').value.trim();
-        const emoji = document.getElementById('new-template-emoji').value.trim() || '📝';
-        if (!name) return;
-        state.templates.push({ name, emoji, tag: 'Прочее', priority: 2 });
-        document.getElementById('new-template-name').value = '';
-        document.getElementById('new-template-emoji').value = '';
-        saveState();
-        renderTemplates();
-        renderTemplatesList();
-    }
-
-    function renderTemplatesList() {
-        const list = document.getElementById('templates-list');
-        if (!list) return;
-        list.innerHTML = state.templates.map((t, i) => `
-            <div class="custom-tag-item">
-                <div style="font-size:20px">${t.emoji}</div>
-                <div class="custom-tag-name">${escapeHtml(t.name)}</div>
-                <button class="custom-tag-delete" onclick="removeTemplate(${i})">×</button>
-            </div>
-        `).join('');
-    }
-
-    function removeTemplate(idx) {
-        state.templates.splice(idx, 1);
-        saveState();
-        renderTemplates();
-        renderTemplatesList();
-    }
-
-    // ===================== TAGS =====================
-    function renderTags() {
-        const options = document.getElementById('tag-options');
-        if (!options) return;
-        options.innerHTML = state.tags.slice(0, 6).map((t, i) =>
-            `<div class="option-btn${i === 0 ? ' selected' : ''}" data-tag="${escapeHtml(t.name)}">${t.emoji} ${escapeHtml(t.name)}</div>`
-        ).join('');
-        options.querySelectorAll('.option-btn').forEach(btn => {
-            btn.onclick = () => {
-                options.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-            };
-        });
-        const colors = document.getElementById('tag-colors');
-        if (colors) {
-            colors.innerHTML = TAG_COLORS.map(c =>
-                `<div class="tag-color-btn${c === selectedTagColor ? ' selected' : ''}" style="background:${c}" onclick="selectTagColor('${c}')"></div>`
-            ).join('');
+        function renderAll() {
+            updateLevelUI();
+            renderTasks();
+            renderTemplates();
+            renderTags();
+            renderThemes();
+            renderCalendar();
+            renderAnalytics();
         }
-        const customList = document.getElementById('custom-tags-list');
-        if (customList) {
-            customList.innerHTML = state.tags.slice(5).map((t, i) => `
-                <div class="custom-tag-item">
-                    <div class="custom-tag-color" style="background:${t.color}"></div>
-                    <div class="custom-tag-name">${escapeHtml(t.name)}</div>
-                    <button class="custom-tag-delete" onclick="removeCustomTag(${i+5})">×</button>
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            const pending = state.tasks.filter(t => !t.completed);
+            
+            if (pending.length === 0) {
+                list.innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-title">Нет задач</div>
+                        <div class="empty-text">Нажми + чтобы добавить</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = pending.map((task) => `
+                <div class="task-card glass" onclick="viewTaskById(${task.id})">
+                    <div class="task-top">
+                        <div class="task-check" onclick="event.stopPropagation(); toggleTaskById(${task.id})">✓</div>
+                        <div class="task-info">
+                            <div class="task-title">${escapeHtml(task.title)}</div>
+                            <div class="task-desc">${escapeHtml(task.description || '')}</div>
+                        </div>
+                    </div>
+                    <div class="task-bottom">
+                        <div class="task-tags">
+                            <span class="task-tag" style="background: ${getTagColor(task.tag)}20; color: ${getTagColor(task.tag)}">${escapeHtml(task.tag)}</span>
+                        </div>
+                        <div class="task-meta">
+                            ${task.deadline ? `<span class="task-meta-item">📅 ${task.deadline}</span>` : ''}
+                            <span class="task-meta-item">${['🔴', '🟡', '🟢'][task.priority - 1]}</span>
+                        </div>
+                    </div>
                 </div>
             `).join('');
         }
-    }
-
-    function selectTagColor(color) {
-        selectedTagColor = color;
-        document.querySelectorAll('.tag-color-btn').forEach(btn => {
-            btn.classList.toggle('selected', btn.style.background === color);
-        });
-    }
-
-    function addCustomTag() {
-        const name = document.getElementById('new-tag-name').value.trim();
-        if (!name) return;
-        safeHaptic('notificationOccurred', 'success');
-        state.tags.push({ name, color: selectedTagColor, emoji: '🏷' });
-        document.getElementById('new-tag-name').value = '';
-        saveState();
-        renderTags();
-    }
-
-    function removeCustomTag(idx) {
-        safeHaptic('notificationOccurred', 'warning');
-        state.tags.splice(idx, 1);
-        saveState();
-        renderTags();
-    }
-
-    // ===================== THEMES =====================
-    function applyTheme(id) {
-        const theme = THEMES.find(t => t.id === id);
-        if (theme?.styles) {
-            Object.entries(theme.styles).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+        
+        function getTaskIndexById(id) {
+            return state.tasks.findIndex(t => t.id === id);
         }
-    }
-
-    function renderThemes() {
-        const grid = document.getElementById('theme-grid');
-        if (!grid) return;
-        grid.innerHTML = THEMES.map(t => {
-            const locked = !t.free && !state.user.premium;
-            return `<div class="theme-option${locked ? ' locked' : ''}${state.user.theme === t.id ? ' selected' : ''}"
-                onclick="${locked ? "openModal('premium-modal')" : "setTheme('" + t.id + "')"}">
-                <div class="theme-preview" style="background:linear-gradient(135deg,#1a1a2e,${t.styles?.['--accent']||'var(--accent)'})"></div>
-                <div class="theme-name">${t.name}</div>
-            </div>`;
-        }).join('');
-    }
-
-    function setTheme(id) {
-        const theme = THEMES.find(t => t.id === id);
-        if (!theme) return;
-        if (!theme.free && !state.user.premium) { openModal('premium-modal'); return; }
-        safeHaptic('notificationOccurred', 'success');
-        state.user.theme = id;
-        applyTheme(id);
-        saveState();
-        renderThemes();
-    }
-
-    // ===================== PREMIUM =====================
-    function selectPlan(plan) {
-        safeHaptic('selectionChanged');
-        selectedPlan = plan;
-        document.querySelectorAll('.premium-plan').forEach(el => el.classList.toggle('selected', el.dataset.plan === plan));
-    }
-
-    function buyPremium() {
-        safeHaptic('impactOccurred', 'medium');
-        const prices = { month: 150, year: 999 };
-        const months = { month: 1, year: 12 };
-        try {
-            if (tg.initData && tg.initData.length > 0) {
-                tg.sendData(JSON.stringify({ action: 'buy_premium', plan: selectedPlan, stars: prices[selectedPlan], months: months[selectedPlan] }));
-            } else {
-                safeShowPopup('PRO', 'Покупка доступна только в Telegram');
-            }
-        } catch(e) { safeShowPopup('PRO', 'Покупка доступна только в Telegram'); }
-    }
-
-    function checkPremium() {
-        safeHaptic('impactOccurred', 'light');
-        try {
-            if (tg.initData && tg.initData.length > 0) {
-                tg.sendData(JSON.stringify({ action: 'check_premium' }));
-                safeShowPopup('Проверка Premium', 'Запрос отправлен боту. Ответ придёт в чат.');
-            } else {
-                safeShowPopup('PRO', 'Проверка доступна только в Telegram');
-            }
-        } catch(e) {}
-    }
-
-    function activatePremium() {
-        state.user.premium = true;
-        saveState();
-        renderAll();
-        closeModal('premium-modal');
-        safeShowPopup('✓ Готово', 'MindFlow Pro активирован!');
-    }
-
-    // ===================== CALENDAR =====================
-    function renderCalendar() {
-        const grid = document.getElementById('calendar-grid');
-        if (!grid) return;
-        const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-        const dayNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-        const calDate = state.calendarDate ? new Date(state.calendarDate) : new Date();
-        const year = calDate.getFullYear();
-        const month = calDate.getMonth();
-        document.getElementById('calendar-month').textContent = monthNames[month] + ' ' + year;
-        const firstDay = new Date(year, month, 1).getDay();
-        const startDay = firstDay === 0 ? 6 : firstDay - 1;
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const todayStr = new Date().toISOString().split('T')[0];
-        let html = dayNames.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
-        for (let i = 0; i < startDay; i++) html += '<div class="calendar-day" style="opacity:0.2;pointer-events:none;"></div>';
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
-            const hasTasks = state.tasks.some(t => t.deadline === dateStr && !t.completed);
-            const isToday = dateStr === todayStr;
-            const isSelected = dateStr === currentCalendarDate;
-            html += `<div class="calendar-day${isToday?' today':''}${hasTasks?' has-tasks':''}${isSelected?' selected-day':''}" onclick="selectDate('${dateStr}')">
-                <div class="calendar-day-num">${day}</div>
-            </div>`;
+        
+        function toggleTaskById(id) {
+            const idx = getTaskIndexById(id);
+            if (idx !== -1) toggleTask(idx);
         }
-        grid.innerHTML = html;
-        if (currentCalendarDate) renderCalendarTasks(currentCalendarDate);
-    }
-
-    function prevMonth() {
-        const d = state.calendarDate ? new Date(state.calendarDate) : new Date();
-        d.setMonth(d.getMonth() - 1);
-        state.calendarDate = d.toISOString();
-        renderCalendar();
-    }
-
-    function nextMonth() {
-        const d = state.calendarDate ? new Date(state.calendarDate) : new Date();
-        d.setMonth(d.getMonth() + 1);
-        state.calendarDate = d.toISOString();
-        renderCalendar();
-    }
-
-    function selectDate(dateStr) {
-        currentCalendarDate = dateStr;
-        renderCalendar();
-    }
-
-    function renderCalendarTasks(dateStr) {
-        const list = document.getElementById('calendar-tasks');
-        if (!list) return;
-        const tasks = state.tasks.filter(t => t.deadline === dateStr && !t.completed);
-        if (tasks.length === 0) {
-            list.innerHTML = '<div class="empty" style="padding:30px 20px;"><div class="empty-text">Нет задач на эту дату</div></div>';
-            return;
+        
+        function viewTaskById(id) {
+            const idx = getTaskIndexById(id);
+            if (idx !== -1) viewTask(idx);
         }
-        list.innerHTML = tasks.map(t => `
-            <div class="task-card glass">
-                <div class="task-top">
-                    <div class="task-check" onclick="calendarToggleTask(${t.id},'${dateStr}')">✓</div>
-                    <div class="task-info">
-                        <div class="task-title">${escapeHtml(t.title)}</div>
-                        <div class="task-desc">${escapeHtml(t.description||'')}</div>
-                    </div>
-                </div>
-                <div class="task-bottom">
-                    <div class="task-tags">
-                        <span class="task-tag" style="background:${getTagColor(t.tag)}20;color:${getTagColor(t.tag)}">${escapeHtml(t.tag||'')}</span>
-                    </div>
-                    <div class="task-meta">
-                        <button onclick="calendarDeleteTask(${t.id},'${dateStr}')" style="background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:4px 8px;">🗑</button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
 
-    function calendarToggleTask(id, dateStr) {
-        safeHaptic('impactOccurred', 'light');
-        const task = getTaskById(id);
-        if (!task) return;
-        task.completed = true;
-        task.completedAt = new Date().toISOString();
-        state.user.completed = (state.user.completed || 0) + 1;
-        const xpGain = [20,10,5][(task.priority||2)-1];
-        state.user.xp = (state.user.xp || 0) + xpGain;
-        saveState();
-        showXPPopup(xpGain);
-        createConfetti();
-        completeTaskOnServer(id);
-        updateLevelUI();
-        renderCalendar();
-    }
-
-    function calendarDeleteTask(id, dateStr) {
-        safeHaptic('impactOccurred', 'medium');
-        const idx = state.tasks.findIndex(t => t.id == id);
-        if (idx !== -1) { state.tasks.splice(idx, 1); saveState(); }
-        renderCalendar();
-        updateLevelUI();
-    }
-
-    // ===================== MODALS =====================
-    function openModal(id) {
-        safeHaptic('impactOccurred', 'light');
-        const el = document.getElementById(id);
-        if (el) el.classList.add('open');
-        if (id === 'tags-modal') renderTags();
-        if (id === 'templates-modal') renderTemplatesList();
-    }
-
-    function closeModal(id) {
-        safeHaptic('impactOccurred', 'light');
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('open');
-    }
-
-    // ===================== ANALYTICS =====================
-    function renderAnalytics() {
-        const ctx1 = document.getElementById('chart-activity');
-        const ctx2 = document.getElementById('chart-category');
-        if (!ctx1 || !ctx2) return;
-
-        // Destroy old charts if exist
-        if (_charts.activity) { _charts.activity.destroy(); _charts.activity = null; }
-        if (_charts.category) { _charts.category.destroy(); _charts.category = null; }
-
-        const labels = [], data = [];
-        for (let i = 6; i >= 0; i--) {
-            const d = new Date(Date.now() - i * 86400000);
-            labels.push(d.toLocaleDateString('ru', { weekday: 'short' }));
-            const dayStr = d.toISOString().split('T')[0];
-            data.push(state.tasks.filter(t => t.completedAt?.startsWith(dayStr)).length);
+        function getTagColor(tagName) {
+            const tag = state.tags.find(t => t.name === tagName);
+            return tag?.color || '#8b5cf6';
         }
-        _charts.activity = new Chart(ctx1, {
-            type: 'line',
-            data: { labels, datasets: [{ label: 'Задачи', data, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)', fill: true, tension: 0.4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
-                          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } } } }
-        });
 
-        const tagData = {};
-        state.tasks.filter(t => t.completed).forEach(t => { tagData[t.tag] = (tagData[t.tag] || 0) + 1; });
-        if (Object.keys(tagData).length === 0) tagData['Нет данных'] = 1;
-        _charts.category = new Chart(ctx2, {
-            type: 'doughnut',
-            data: { labels: Object.keys(tagData), datasets: [{ data: Object.values(tagData), backgroundColor: ['#8b5cf6','#ef4444','#10b981','#f59e0b','#0ea5e9'] }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)' } } } }
-        });
-    }
-
-    // ===================== XP / CONFETTI =====================
-    function showXPPopup(xp) {
-        const popup = document.getElementById('xp-popup');
-        if (!popup) return;
-        document.getElementById('xp-value').textContent = '+' + xp + ' XP';
-        popup.style.display = 'block';
-        popup.style.animation = 'none';
-        void popup.offsetHeight;
-        popup.style.animation = 'xpPop 1.5s ease forwards';
-        setTimeout(() => popup.style.display = 'none', 1500);
-    }
-
-    function createConfetti() {
-        const container = document.getElementById('confetti');
-        if (!container) return;
-        const colors = ['#8b5cf6','#10b981','#f59e0b','#ef4444','#0ea5e9'];
-        for (let i = 0; i < 40; i++) {
-            const el = document.createElement('div');
-            el.className = 'confetti';
-            el.style.left = Math.random() * 100 + 'vw';
-            el.style.background = colors[Math.floor(Math.random() * colors.length)];
-            el.style.animationDelay = Math.random() * 0.5 + 's';
-            container.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
-        }
-    }
-
-    // ===================== AI =====================
-    function sendAI() {
-        const input = document.getElementById('ai-input');
-        const text = input.value.trim();
-        if (!text) return;
-        safeHaptic('impactOccurred', 'light');
-        const messages = document.getElementById('ai-messages');
-        messages.innerHTML += `<div class="ai-msg user"><div class="ai-avatar">👤</div><div class="ai-bubble">${escapeHtml(text)}</div></div>`;
-        input.value = '';
-        const typingId = 'typing-' + Date.now();
-        messages.innerHTML += `<div class="ai-msg" id="${typingId}"><div class="ai-avatar">🧠</div><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
-        messages.scrollTop = messages.scrollHeight;
-        setTimeout(() => {
-            const typing = document.getElementById(typingId);
-            if (!typing) return;
-            const response = processAICommand(text);
-            if (response.createTask) {
-                const newTask = {
-                    id: String(Date.now()),
-                    title: response.title,
-                    description: response.description || '',
-                    priority: response.priority || 2,
-                    tag: response.category || 'Прочее',
-                    deadline: response.deadline || null,
-                    completed: false,
-                    createdAt: new Date().toISOString()
-                };
-                state.tasks.push(newTask);
-                state.user.xp = (state.user.xp || 0) + 5;
-                saveState();
-                safeHaptic('notificationOccurred', 'success');
-                typing.innerHTML = `<div class="ai-avatar">🧠</div><div class="ai-bubble">✅ Задача создана!<br><br>📋 <b>${escapeHtml(response.title)}</b><br>${response.deadline ? '📅 ' + response.deadline + '<br>' : ''}⚡ ${['Высокий','Средний','Низкий'][(response.priority||2)-1]} приоритет<br><br><i>Смотри во вкладке "Задачи"</i></div>`;
-                updateLevelUI();
-                renderTasks();
-            } else {
-                typing.innerHTML = `<div class="ai-avatar">🧠</div><div class="ai-bubble">${response.message}</div>`;
-            }
-            messages.scrollTop = messages.scrollHeight;
-        }, 300 + Math.random() * 200);
-    }
-
-    function quickAI(text) {
-        document.getElementById('ai-input').value = text;
-        sendAI();
-    }
-
-    function processAICommand(text) {
-        const lower = text.toLowerCase();
-        if (lower.includes('создай') || lower.includes('добавь') || lower.includes('задача') || lower.includes('надо') || lower.includes('нужно') || lower.includes('купить') || lower.includes('позвонить') || lower.includes('встреча') || lower.includes('сделать')) {
-            return { createTask: true, ...parseTaskFromText(text) };
-        }
-        if (lower.includes('сколько') && (lower.includes('задач') || lower.includes('дел'))) {
-            const total = state.tasks.length, pending = state.tasks.filter(t => !t.completed).length, completed = state.tasks.filter(t => t.completed).length;
-            return { message: `📊 У тебя:<br>• Всего задач: <b>${total}</b><br>• В работе: <b>${pending}</b><br>• Выполнено: <b>${completed}</b>` };
-        }
-        if (lower.includes('статистик') || lower.includes('прогресс') || lower.includes('уровень')) {
-            return { message: `📈 Твоя статистика:<br><br>⭐ Уровень: <b>${state.user.level}</b><br>✨ XP: <b>${state.user.xp}</b><br>🔥 Серия: <b>${state.user.streak}</b> дней<br>✅ Выполнено: <b>${state.user.completed}</b> задач<br><br>${state.user.streak >= 3 ? '💪 Отличная серия!' : '💡 Выполняй задачи каждый день!'}` };
-        }
-        if (lower.includes('совет') || lower.includes('помощь') || lower.includes('что делать')) {
-            const tips = ['🎯 Начни с самой важной задачи дня!','🍅 Pomodoro: 25 мин работы, 5 мин отдыха','📝 Разделяй большие задачи на мелкие','⏰ Установи дедлайны — это мотивирует!','🌙 Планируй завтрашний день вечером','✅ Делай 3–5 важных задач в день'];
-            return { message: '💡 ' + tips[Math.floor(Math.random() * tips.length)] };
-        }
-        if (lower.includes('привет') || lower.includes('здравствуй') || lower.includes('хай')) {
-            const h = new Date().getHours();
-            const gr = h < 12 ? 'Доброе утро' : h < 18 ? 'Добрый день' : 'Добрый вечер';
-            return { message: `${gr}, ${state.userName}! 👋<br><br>Напиши что надо сделать, и я создам задачу. Например:<br><i>"завтра встреча с клиентом в 15:00"</i>` };
-        }
-        return { createTask: true, ...parseTaskFromText(text) };
-    }
-
-    function parseTaskFromText(text) {
-        let title = text, priority = 2, deadline = null, category = 'Прочее';
-        const lower = text.toLowerCase();
-        if (lower.includes('срочно') || lower.includes('важно') || lower.includes('!!')) { priority = 1; title = title.replace(/срочно|важно|!!/gi, '').trim(); }
-        if (lower.includes('потом') || lower.includes('не срочно')) { priority = 3; title = title.replace(/потом|не срочно/gi, '').trim(); }
-        if (lower.includes('завтра')) { const d = new Date(); d.setDate(d.getDate()+1); deadline = d.toISOString().split('T')[0]; title = title.replace(/завтра/gi,'').trim(); }
-        else if (lower.includes('сегодня')) { deadline = new Date().toISOString().split('T')[0]; title = title.replace(/сегодня/gi,'').trim(); }
-        const dm = lower.match(/через\s+(\d+)\s+дн[еяй]/);
-        if (dm) { const d = new Date(); d.setDate(d.getDate()+parseInt(dm[1])); deadline = d.toISOString().split('T')[0]; title = title.replace(/через\s+\d+\s+дн[еяй]/gi,'').trim(); }
-        if (lower.includes('работ') || lower.includes('клиент') || lower.includes('проект')) category = 'Работа';
-        else if (lower.includes('дом') || lower.includes('квартир') || lower.includes('уборк')) category = 'Дом';
-        else if (lower.includes('учёб') || lower.includes('курс') || lower.includes('экзамен')) category = 'Учёба';
-        else if (lower.includes('спорт') || lower.includes('трен') || lower.includes('бег')) category = 'Спорт';
-        title = title.replace(/^(создай|добавь|задача|надо|нужно)\s*/i,'').trim();
-        if (!title) title = text.substring(0, 60);
-        return { title, priority, deadline, category };
-    }
-
-    // ===================== NAVIGATION =====================
-    function initNav() {
-        document.querySelectorAll('.nav-pill').forEach(pill => {
-            pill.addEventListener('click', () => {
-                safeHaptic('selectionChanged');
-                document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                const section = document.getElementById('section-' + pill.dataset.section);
-                if (section) section.classList.add('active');
-                // Render analytics only when switching to that tab
-                if (pill.dataset.section === 'analytics') renderAnalytics();
-            });
-        });
-    }
-
-    // ===================== TASK FORM =====================
-    function initTaskForm() {
-        document.querySelectorAll('#priority-options .option-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                safeHaptic('selectionChanged');
-                document.querySelectorAll('#priority-options .option-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-            });
-        });
-
-        document.getElementById('task-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('task-title').value.trim();
-            if (!title) { safeShowPopup('Ошибка', 'Введите название задачи'); return; }
-            const desc = document.getElementById('task-desc').value.trim();
-            const priorityEl = document.querySelector('#priority-options .option-btn.selected');
-            const priority = parseInt(priorityEl?.dataset.value || '2');
-            const tagEl = document.querySelector('#tag-options .option-btn.selected');
-            const tag = tagEl?.dataset.tag || (state.tags[0]?.name || 'Прочее');
-            const deadline = document.getElementById('task-deadline').value;
-
-            const task = { id: String(Date.now()), title, description: desc, priority, tag, deadline: deadline || null, completed: false, createdAt: new Date().toISOString() };
-            state.tasks.push(task);
-            state.user.xp = (state.user.xp || 0) + 10;
-            saveState();
-            safeHaptic('notificationOccurred', 'success');
-            showXPPopup(10);
-            closeModal('task-modal');
-            document.getElementById('task-form').reset();
-            document.querySelectorAll('#priority-options .option-btn').forEach((b, i) => b.classList.toggle('selected', i === 1));
-            document.querySelectorAll('#tag-options .option-btn').forEach((b, i) => b.classList.toggle('selected', i === 0));
-            renderAll();
-            syncTaskToServer(task).catch(() => {});
-            try {
-                if (tg.initData && tg.initData.length > 0) {
-                    tg.sendData(JSON.stringify({ action: 'add_task', title, description: desc, priority, category: tag, deadline }));
+        function toggleTask(idx) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            const task = state.tasks[idx];
+            if (!task) return;
+            
+            if (!task.completed) {
+                task.completed = true;
+                task.completedAt = new Date().toISOString();
+                state.user.completed = (state.user.completed || 0) + 1;
+                state.user.xp = (state.user.xp || 0) + [20, 10, 5][task.priority - 1];
+                
+                const today = new Date().toDateString();
+                const lastActivity = state.user.lastActivity;
+                if (lastActivity !== today) {
+                    const yesterday = new Date(Date.now() - 86400000).toDateString();
+                    state.user.streak = lastActivity === yesterday ? (state.user.streak || 0) + 1 : 1;
+                    state.user.lastActivity = today;
                 }
-            } catch(e) {}
-        });
-    }
+                
+                saveState();
+                showXPPopup([20, 10, 5][task.priority - 1]);
+                createConfetti();
+                completeTaskOnServer(task.id);
+            } else {
+                task.completed = false;
+                task.completedAt = null;
+                state.user.completed = Math.max(0, (state.user.completed || 0) - 1);
+                saveState();
+            }
+            
+            renderAll();
+        }
 
-    // ===================== MODAL OVERLAY CLOSE =====================
-    function initModals() {
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', e => {
-                if (e.target === overlay) overlay.classList.remove('open');
+        function viewTask(idx) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            const pending = state.tasks.filter(t => !t.completed);
+            const task = pending[idx];
+            if (!task) return;
+            
+            document.getElementById('view-title').textContent = task.title;
+            document.getElementById('view-desc').textContent = task.description || '—';
+            document.getElementById('view-priority').textContent = ['Высокий', 'Средний', 'Низкий'][task.priority - 1];
+            document.getElementById('view-tag').textContent = task.tag;
+            
+            document.getElementById('view-complete').onclick = () => {
+                closeModal('view-modal');
+                toggleTaskById(task.id);
+            };
+            
+            document.getElementById('view-delete').onclick = () => {
+                const realIdx = getTaskIndexById(task.id);
+                if (realIdx !== -1) {
+                    state.tasks.splice(realIdx, 1);
+                    saveState();
+                }
+                closeModal('view-modal');
+                renderAll();
+            };
+            
+            openModal('view-modal');
+        }
+
+        function renderTemplates() {
+            const scroll = document.getElementById('templates-scroll');
+            scroll.innerHTML = state.templates.map(t => 
+                `<div class="template-chip" onclick="createFromTemplate('${t.name}', '${t.tag}', ${t.priority})">${t.emoji} ${t.name}</div>`
+            ).join('') + `<div class="template-chip template-add" onclick="openModal('templates-modal')">+ Свой</div>`;
+        }
+
+        function createFromTemplate(name, tag, priority) {
+            document.getElementById('task-title').value = name;
+            document.querySelectorAll('#priority-options .option-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.value == priority);
             });
-        });
-    }
+            document.querySelectorAll('#tag-options .option-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.tag === tag);
+            });
+            openModal('task-modal');
+        }
 
-    // ===================== TELEGRAM EVENTS =====================
-    tg.onEvent?.('customEvent', (event) => {
-        if (event.detail?.action === 'premium_activated') {
+        function renderTags() {
+            const options = document.getElementById('tag-options');
+            if (!options) return;
+            
+            options.innerHTML = state.tags.slice(0, 6).map((t, i) => 
+                `<div class="option-btn ${i === 0 ? 'selected' : ''}" data-tag="${t.name}">${t.emoji} ${t.name}</div>`
+            ).join('');
+            
+            options.querySelectorAll('.option-btn').forEach(btn => {
+                btn.onclick = () => {
+                    options.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                };
+            });
+            
+            const colors = document.getElementById('tag-colors');
+            colors.innerHTML = TAG_COLORS.map(c => 
+                `<div class="tag-color-btn" style="background: ${c}" onclick="selectTagColor('${c}')"></div>`
+            ).join('');
+            
+            const customList = document.getElementById('custom-tags-list');
+            customList.innerHTML = state.tags.slice(5).map((t, i) => `
+                <div class="custom-tag-item">
+                    <div class="custom-tag-color" style="background: ${t.color}"></div>
+                    <div class="custom-tag-name">${t.name}</div>
+                    <button class="custom-tag-delete" onclick="removeCustomTag(${i + 5})">×</button>
+                </div>
+            `).join('');
+        }
+
+        let selectedTagColor = TAG_COLORS[0];
+        
+        function selectTagColor(color) {
+            selectedTagColor = color;
+            document.querySelectorAll('.tag-color-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.style.background === color);
+            });
+        }
+
+        function addCustomTag() {
+            const name = document.getElementById('new-tag-name').value.trim();
+            if (!name) return;
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            state.tags.push({ name, color: selectedTagColor, emoji: '🏷' });
+            document.getElementById('new-tag-name').value = '';
+            saveState();
+            renderTags();
+        }
+
+        function removeCustomTag(idx) {
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+            state.tags.splice(idx, 1);
+            saveState();
+            renderTags();
+        }
+
+        function renderThemes() {
+            const grid = document.getElementById('theme-grid');
+            grid.innerHTML = THEMES.map(t => {
+                const locked = !t.free && !state.user.premium;
+                return `
+                    <div class="theme-option ${locked ? 'locked' : ''} ${state.user.theme === t.id ? 'selected' : ''}" 
+                         onclick="${locked ? 'openModal(\'premium-modal\')' : `setTheme('${t.id}')`}">
+                        ${!t.free && state.user.premium ? '' : ''}
+                        <div class="theme-preview" style="background: linear-gradient(135deg, var(--bg-primary, #1a1a2e), ${t.styles?.['--accent'] || 'var(--accent)'})"></div>
+                        <div class="theme-name">${t.name}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setTheme(id) {
+            const theme = THEMES.find(t => t.id === id);
+            if (!theme.free && !state.user.premium) {
+                openModal('premium-modal');
+                return;
+            }
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            state.user.theme = id;
+            
+            if (theme.styles) {
+                Object.assign(document.documentElement.style, theme.styles);
+            }
+            
+            saveState();
+            renderThemes();
+        }
+
+        function selectPlan(plan) {
+            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+            selectedPlan = plan;
+            document.querySelectorAll('.premium-plan').forEach(el => {
+                el.classList.toggle('selected', el.dataset.plan === plan);
+            });
+        }
+
+        function buyPremium() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            tg.sendData(JSON.stringify({
+                action: 'buy_premium',
+                plan: selectedPlan
+            }));
+        }
+        
+        function checkPremium() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            if (API_URL) {
+                syncPremiumStatus().then(() => {
+                    _showPremiumResult();
+                });
+            } else {
+                tg.sendData(JSON.stringify({ action: 'check_premium' }));
+                tg.showPopup({ title: 'Проверка Premium', message: 'Запрос отправлен боту. Ответ придёт в чат.', buttons: [{ type: 'ok' }] });
+            }
+        }
+
+        function _showPremiumResult() {
+            if (state.user.premium) {
+                tg.showPopup({ title: '✅ Premium активен', message: 'MindFlow Pro подключён!' + (state.user.premium_until ? '\nДействует до: ' + state.user.premium_until : ''), buttons: [{ type: 'ok' }] });
+            } else {
+                tg.showPopup({ title: '❌ Premium не активен', message: 'Подключите MindFlow Pro для доступа ко всем функциям', buttons: [{ type: 'ok' }] });
+            }
+        }
+        
+        function activatePremium() {
             state.user.premium = true;
             saveState();
             renderAll();
+            closeModal('premium-modal');
+            createConfetti();
+            tg.showPopup({ title: '✓ Готово', message: 'MindFlow Pro активирован!', buttons: [{ type: 'ok' }] });
         }
-    });
 
-    // ===================== INIT =====================
-    document.getElementById('ai-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAI(); }
-    });
+        function showXPPopup(xp) {
+            const popup = document.getElementById('xp-popup');
+            document.getElementById('xp-value').textContent = `+${xp} XP`;
+            popup.style.display = 'block';
+            popup.style.animation = 'none';
+            popup.offsetHeight;
+            popup.style.animation = 'xpPop 1.5s ease forwards';
+            setTimeout(() => popup.style.display = 'none', 1500);
+        }
 
-    initNav();
-    initTaskForm();
-    initModals();
+        function createConfetti() {
+            const container = document.getElementById('confetti');
+            const colors = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                container.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function openModal(id) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById(id).classList.add('open');
+        }
+
+        function closeModal(id) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById(id).classList.remove('open');
+        }
+        
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('open');
+                }
+            });
+        });
+
+        document.querySelectorAll('.nav-pill').forEach(pill => {
+            pill.onclick = () => {
+                if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('section-' + pill.dataset.section).classList.add('active');
+            };
+        });
+
+        document.querySelectorAll('#priority-options .option-btn').forEach(btn => {
+            btn.onclick = () => {
+                if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                document.querySelectorAll('#priority-options .option-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            };
+        });
+
+        document.getElementById('task-form').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('task-title').value.trim();
+            if (!title) {
+                tg.showPopup({ title: 'Ошибка', message: 'Введите название задачи', buttons: [{ type: 'ok' }] });
+                return;
+            }
+            
+            const desc = document.getElementById('task-desc').value;
+            const priority = parseInt(document.querySelector('#priority-options .selected')?.dataset.value || 2);
+            const tag = document.querySelector('#tag-options .selected')?.dataset.tag || state.tags[0].name;
+            const deadline = document.getElementById('task-deadline').value;
+            
+            const task = {
+                id: Date.now(),
+                title, description: desc, priority, tag, deadline,
+                completed: false, createdAt: new Date().toISOString()
+            };
+            
+            state.tasks.push(task);
+            state.user.xp += 10;
+            saveState();
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            showXPPopup(10);
+            
+            closeModal('task-modal');
+            document.getElementById('task-form').reset();
+            renderAll();
+            
+            await syncTaskToServer(task);
+            
+            try {
+                tg.sendData(JSON.stringify({
+                    action: 'add_task',
+                    title,
+                    description: desc,
+                    priority,
+                    category: tag,
+                    deadline
+                }));
+            } catch(e) {}
+        };
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                               'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            
+            const year = state.calendar.getFullYear();
+            const month = state.calendar.getMonth();
+            
+            document.getElementById('calendar-month').textContent = `${monthNames[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const startDay = firstDay === 0 ? 6 : firstDay - 1;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            let html = dayNames.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+            
+            for (let i = 0; i < startDay; i++) {
+                html += '<div class="calendar-day" style="opacity: 0.3;"></div>';
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasTasks = state.tasks.some(t => t.deadline === dateStr && !t.completed);
+                const isToday = dateStr === todayStr;
+                
+                html += `
+                    <div class="calendar-day ${isToday ? 'today' : ''} ${hasTasks ? 'has-tasks' : ''}" 
+                         onclick="selectDate('${dateStr}')">
+                        <div class="calendar-day-num">${day}</div>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
+        }
+
+        function prevMonth() {
+            state.calendar.setMonth(state.calendar.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            state.calendar.setMonth(state.calendar.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function selectDate(dateStr) {
+            const tasks = state.tasks.filter(t => t.deadline === dateStr && !t.completed);
+            const list = document.getElementById('calendar-tasks');
+            
+            if (tasks.length === 0) {
+                list.innerHTML = '<div class="empty" style="padding: 30px;"><div class="empty-text">Нет активных задач на эту дату</div></div>';
+            } else {
+                list.innerHTML = tasks.map((t) => `
+                    <div class="task-card glass" onclick="viewTaskById(${t.id})">
+                        <div class="task-top">
+                            <div class="task-check" onclick="event.stopPropagation(); toggleTaskById(${t.id})">✓</div>
+                            <div class="task-info">
+                                <div class="task-title">${escapeHtml(t.title)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function sendAI() {
+            const input = document.getElementById('ai-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            const messages = document.getElementById('ai-messages');
+            messages.innerHTML += `
+                <div class="ai-msg user">
+                    <div class="ai-avatar">👤</div>
+                    <div class="ai-bubble">${escapeHtml(text)}</div>
+                </div>
+            `;
+            
+            input.value = '';
+            
+            messages.innerHTML += `
+                <div class="ai-msg" id="typing-msg">
+                    <div class="ai-avatar">🧠</div>
+                    <div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+                </div>
+            `;
+            
+            messages.scrollTop = messages.scrollHeight;
+            
+            setTimeout(() => {
+                const typing = document.getElementById('typing-msg');
+                const response = processAICommand(text);
+                
+                if (response.createTask) {
+                    const newTask = {
+                        id: Date.now(),
+                        title: response.title,
+                        description: response.description || '',
+                        priority: response.priority || 2,
+                        tag: response.category || 'Прочее',
+                        deadline: response.deadline,
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    state.tasks.push(newTask);
+                    saveState();
+                    
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    
+                    typing.innerHTML = `
+                        <div class="ai-avatar">🧠</div>
+                        <div class="ai-bubble">✅ Задача создана!<br><br>
+                        📋 <b>${escapeHtml(response.title)}</b><br>
+                        ${response.deadline ? '📅 ' + response.deadline + '<br>' : ''}
+                        ⚡ ${['Высокий', 'Средний', 'Низкий'][response.priority - 1]} приоритет<br><br>
+                        <i>Нажми на вкладку "Задачи" чтобы увидеть</i></div>
+                    `;
+                    
+                    state.user.xp += 5;
+                    renderAll();
+                } else {
+                    typing.innerHTML = `
+                        <div class="ai-avatar">🧠</div>
+                        <div class="ai-bubble">${response.message}</div>
+                    `;
+                }
+                
+                messages.scrollTop = messages.scrollHeight;
+            }, 800 + Math.random() * 700);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function processAICommand(text) {
+            const lower = text.toLowerCase();
+            
+            if (lower.includes('создай') || lower.includes('добавь') || lower.includes('задача') || lower.includes('надо') || lower.includes('нужно') || lower.includes('купить') || lower.includes('позвонить') || lower.includes('встреча') || lower.includes('сделать')) {
+                const task = parseTaskFromText(text);
+                return { createTask: true, ...task };
+            }
+            
+            if (lower.includes('сколько') && (lower.includes('задач') || lower.includes('дел'))) {
+                const total = state.tasks.length;
+                const pending = state.tasks.filter(t => !t.completed).length;
+                const completed = state.tasks.filter(t => t.completed).length;
+                return { message: `📊 У тебя:<br>• Всего задач: <b>${total}</b><br>• В работе: <b>${pending}</b><br>• Выполнено: <b>${completed}</b>` };
+            }
+            
+            if (lower.includes('статистик') || lower.includes('прогресс') || lower.includes('уровень')) {
+                return { message: `📈 Твоя статистика:<br><br>
+                    ⭐ Уровень: <b>${state.user.level}</b><br>
+                    ✨ XP: <b>${state.user.xp}</b><br>
+                    🔥 Серия: <b>${state.user.streak}</b> дней<br>
+                    ✅ Выполнено: <b>${state.user.completed}</b> задач<br><br>
+                    ${state.user.streak >= 3 ? '💪 Отличная серия! Так держать!' : '💡 Выполняй задачи каждый день чтобы увеличить серию!'}` };
+            }
+            
+            if (lower.includes('совет') || lower.includes('помощь') || lower.includes('подсказк') || lower.includes('что делать')) {
+                const tips = [
+                    '🎯 Начни с самой важной задачи дня - сделай её первой!',
+                    '🍅 Используй технику Pomodoro: 25 минут работы, 5 минут отдыха',
+                    '📝 Разделяй большие задачи на мелкие подзадачи',
+                    '⏰ Установи дедлайны - это мотивирует!',
+                    '🧘 Делай перерывы каждые 1-2 часа для отдыха',
+                    '📊 Проверяй аналитику в конце недели',
+                    '🌙 Планируй завтрашний день вечером',
+                    '✅ Выполняй 3-5 важных задач в день, не больше'
+                ];
+                const pending = state.tasks.filter(t => !t.completed);
+                if (pending.length > 5) {
+                    return { message: `⚠️ У тебя ${pending.length} невыполненных задач!<br><br>💡 ${tips[Math.floor(Math.random() * tips.length)]}` };
+                }
+                return { message: `💡 ${tips[Math.floor(Math.random() * tips.length)]}` };
+            }
+            
+            if (lower.includes('привет') || lower.includes('здравствуй') || lower.includes('хай') || lower.includes('hi')) {
+                const hour = new Date().getHours();
+                let greeting = hour < 12 ? 'Доброе утро' : hour < 18 ? 'Добрый день' : 'Добрый вечер';
+                return { message: `${greeting}, ${state.userName}! 👋<br><br>Я MindFlow AI. Могу:<br>
+                    • Создавать задачи (напиши что нужно сделать)<br>
+                    • Показать статистику<br>
+                    • Дать советы по продуктивности<br><br>Просто напиши задачу, например: "завтра встреча с клиентом в 15:00"` };
+            }
+            
+            if (lower.includes('очисти') || lower.includes('удали все') || lower.includes('сброс')) {
+                return { message: '🗑 Чтобы удалить все задачи, зайди в Настройки ⚙️' };
+            }
+            
+            const task = parseTaskFromText(text);
+            return { createTask: true, ...task };
+        }
+        
+        function parseTaskFromText(text) {
+            let title = text;
+            let priority = 2;
+            let deadline = null;
+            let category = 'Прочее';
+            
+            const lower = text.toLowerCase();
+            
+            if (lower.includes('срочно') || lower.includes('важно') || lower.includes('!!')) {
+                priority = 1;
+                title = title.replace(/срочно|важно|!!/gi, '').trim();
+            }
+            
+            if (lower.includes('потом') || lower.includes('не срочно') || lower.includes('когда-нибудь')) {
+                priority = 3;
+                title = title.replace(/потом|не срочно|когда-нибудь/gi, '').trim();
+            }
+            
+            if (lower.includes('завтра')) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                deadline = tomorrow.toISOString().split('T')[0];
+                title = title.replace(/завтра/gi, '').trim();
+            }
+            
+            if (lower.includes('сегодня') || lower.includes('вечер') || lower.includes('утро')) {
+                deadline = new Date().toISOString().split('T')[0];
+                title = title.replace(/сегодня|вечер|утро/gi, '').trim();
+            }
+            
+            const daysMatch = lower.match(/через\s+(\d+)\s+дн[еяй]/);
+            if (daysMatch) {
+                const days = parseInt(daysMatch[1]);
+                const date = new Date();
+                date.setDate(date.getDate() + days);
+                deadline = date.toISOString().split('T')[0];
+                title = title.replace(/через\s+\d+\s+дн[еяй]/gi, '').trim();
+            }
+            
+            if (lower.includes('работ') || lower.includes('клиент') || lower.includes('проект') || lower.includes('meet')) {
+                category = 'Работа';
+            } else if (lower.includes('дом') || lower.includes('квартир') || lower.includes('уборк')) {
+                category = 'Дом';
+            } else if (lower.includes('учёб') || lower.includes('курс') || lower.includes('экзамен')) {
+                category = 'Учёба';
+            } else if (lower.includes('спорт') || lower.includes('трен') || lower.includes('бег') || lower.includes('жим')) {
+                category = 'Спорт';
+            }
+            
+            title = title.replace(/^(создай|добавь|задача|надо|нужно)\s*/i, '').trim();
+            if (!title) title = text.substring(0, 50);
+            
+            return { title, priority, deadline, category };
+        }
+
+        function renderAnalytics() {
+            const ctx1 = document.getElementById('chart-activity');
+            const ctx2 = document.getElementById('chart-category');
+            
+            if (!state.charts.activity) {
+                const labels = [];
+                const data = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(Date.now() - i * 86400000);
+                    labels.push(d.toLocaleDateString('ru', { weekday: 'short' }));
+                    const dayStr = d.toISOString().split('T')[0];
+                    data.push(state.tasks.filter(t => t.completedAt?.startsWith(dayStr)).length);
+                }
+                
+                state.charts.activity = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Задачи',
+                            data,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } }
+                        }
+                    }
+                });
+                
+                const tagData = {};
+                state.tasks.filter(t => t.completed).forEach(t => {
+                    tagData[t.tag] = (tagData[t.tag] || 0) + 1;
+                });
+                
+                state.charts.category = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(tagData),
+                        datasets: [{
+                            data: Object.values(tagData),
+                            backgroundColor: ['#8b5cf6', '#ef4444', '#10b981', '#f59e0b', '#0ea5e9']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: 'rgba(255,255,255,0.7)' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function addTemplate() {
+            const name = document.getElementById('new-template-name').value.trim();
+            const emoji = document.getElementById('new-template-emoji').value.trim() || '📝';
+            if (!name) return;
+            
+            state.templates.push({ name, emoji, tag: 'Прочее', priority: 2 });
+            document.getElementById('new-template-name').value = '';
+            document.getElementById('new-template-emoji').value = '';
+            saveState();
+            renderTemplates();
+        }
+
+        loadState();
+        syncWithServer();
+        syncPremiumStatus();
+        startPremiumPolling();
+        initPushNotifications();
+        loadReminders();
+        
+        document.getElementById('ai-user-name').textContent = state.userName;
+        
+        function quickAI(text) {
+            document.getElementById('ai-input').value = text;
+            sendAI();
+        }
+        
+        document.getElementById('ai-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendAI();
+            }
+        });
+
+        // === PUSH NOTIFICATIONS ===
+        async function initPushNotifications() {
+            if (!API_URL || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+            try {
+                const reg = await navigator.serviceWorker.register('/sw.js');
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') return;
+                const sub = await reg.pushManager.getSubscription();
+                if (sub) {
+                    await sendSubscriptionToServer(sub);
+                    return;
+                }
+                const vapidRes = await fetch(`${API_URL}/api/vapid-public-key`);
+                if (!vapidRes.ok) return;
+                const { publicKey } = await vapidRes.json();
+                const newSub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: publicKey,
+                });
+                await sendSubscriptionToServer(newSub);
+            } catch (e) {
+                console.log('Push init error:', e);
+            }
+        }
+
+        async function sendSubscriptionToServer(subscription) {
+            if (!API_URL) return;
+            try {
+                await fetch(`${API_URL}/api/push/${USER_ID}/subscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscription: JSON.stringify(subscription) }),
+                });
+            } catch (e) {
+                console.log('Push subscription save error:', e);
+            }
+        }
+
+        // === VOICE INPUT ===
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        async function startVoiceInput() {
+            if (!navigator.mediaDevices || !API_URL) {
+                tg.showPopup({ title: 'Ошибка', message: 'Голосовой ввод недоступен', buttons: [{ type: 'ok' }] });
+                return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/ogg' });
+                audioChunks = [];
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    closeModal('voice-modal');
+                    const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                    const formData = new FormData();
+                    formData.append('file', blob, `voice.${mediaRecorder.mimeType.includes('webm') ? 'webm' : 'ogg'}`);
+                    try {
+                        const res = await fetch(`${API_URL}/api/voice/${USER_ID}`, { method: 'POST', body: formData });
+                        if (res.ok) {
+                            const { text } = await res.json();
+                            if (text) {
+                                document.getElementById('task-title').value = text;
+                                openModal('task-modal');
+                                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Voice upload error:', e);
+                        tg.showPopup({ title: 'Ошибка', message: 'Не удалось распознать голос', buttons: [{ type: 'ok' }] });
+                    }
+                };
+                mediaRecorder.start();
+                openModal('voice-modal');
+            } catch (e) {
+                console.log('Microphone error:', e);
+                tg.showPopup({ title: 'Микрофон', message: 'Разреши доступ к микрофону', buttons: [{ type: 'ok' }] });
+            }
+        }
+
+        function stopVoiceInput() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        }
+
+        // === REMINDERS ===
+        async function loadReminders() {
+            if (!API_URL || USER_ID.startsWith('guest_')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/reminders/${USER_ID}`);
+                if (res.ok) {
+                    const reminders = await res.json();
+                    renderReminders(reminders);
+                }
+            } catch (e) {
+                console.log('Load reminders error:', e);
+            }
+        }
+
+        function renderReminders(reminders) {
+            const list = document.getElementById('reminders-list');
+            if (!reminders || reminders.length === 0) {
+                list.innerHTML = '<div class="empty" style="padding:30px;"><div class="empty-icon">🔔</div><div class="empty-title">Нет напоминаний</div><div class="empty-text">Нажми + чтобы создать</div></div>';
+                return;
+            }
+            list.innerHTML = reminders.map(r => {
+                const dt = new Date(r.remind_at);
+                const timeStr = dt.toLocaleString('ru', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                const repeatLabel = r.repeat_interval ? { daily: '🔄 Ежедневно', weekly: '🔄 Еженедельно', monthly: '🔄 Ежемесячно' }[r.repeat_interval] || '' : '';
+                return `<div class="task-card glass" style="margin-bottom:10px;">
+                    <div class="task-top">
+                        <div style="font-size:18px;">🔔</div>
+                        <div class="task-info">
+                            <div class="task-title">${escapeHtml(r.text || 'Напоминание')}</div>
+                            <div class="task-desc">⏰ ${timeStr} ${repeatLabel}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <button class="btn btn-secondary" style="flex:1;padding:8px;" onclick="snoozeReminder(${r.id})">😴 10 мин</button>
+                        <button class="btn btn-danger" style="flex:1;padding:8px;" onclick="deleteReminder(${r.id})">🗑</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function snoozeReminder(id) {
+            if (!API_URL) return;
+            try {
+                await fetch(`${API_URL}/api/reminders/${id}/snooze?user_id=${USER_ID}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ minutes: 10 }) });
+                loadReminders();
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } catch (e) { console.log('Snooze error:', e); }
+        }
+
+        async function deleteReminder(id) {
+            if (!API_URL) return;
+            try {
+                await fetch(`${API_URL}/api/reminders/${id}?user_id=${USER_ID}`, { method: 'DELETE' });
+                loadReminders();
+            } catch (e) { console.log('Delete reminder error:', e); }
+        }
+
+        document.getElementById('reminder-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('reminder-text').value.trim();
+            const datetime = document.getElementById('reminder-datetime').value;
+            if (!text || !datetime) return;
+            const remindAt = new Date(datetime).toISOString();
+            const repeat = document.querySelector('#repeat-options .selected')?.dataset.value || '';
+            if (!API_URL) { tg.sendData(JSON.stringify({ action: 'add_reminder', text, remind_at: remindAt, repeat_interval: repeat })); closeModal('reminder-modal'); return; }
+            try {
+                await fetch(`${API_URL}/api/reminders/${USER_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, remind_at: remindAt, repeat_interval: repeat || null }),
+                });
+                closeModal('reminder-modal');
+                document.getElementById('reminder-form').reset();
+                loadReminders();
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } catch (e) { console.log('Create reminder error:', e); }
+        };
+
+        document.querySelectorAll('#repeat-options .option-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('#repeat-options .option-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            };
+        });
+
+        function setReminderQuick(preset) {
+            const dtInput = document.getElementById('reminder-datetime');
+            const now = new Date();
+            let target;
+            if (preset === 'today') target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 0);
+            else if (preset === 'tomorrow') target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0);
+            else if (preset === '1h') target = new Date(now.getTime() + 3600000);
+            else if (preset === '3h') target = new Date(now.getTime() + 10800000);
+            if (target) {
+                const local = new Date(target.getTime() - target.getTimezoneOffset() * 60000);
+                dtInput.value = local.toISOString().slice(0, 16);
+            }
+        }
+
+        // === QUICK DEADLINE BUTTONS ===
+        function quickDeadline(preset) {
+            let date;
+            if (preset === 'today') date = new Date().toISOString().split('T')[0];
+            else if (preset === 'tomorrow') { const d = new Date(); d.setDate(d.getDate() + 1); date = d.toISOString().split('T')[0]; }
+            else if (preset === 'week') { const d = new Date(); d.setDate(d.getDate() + 7); date = d.toISOString().split('T')[0]; }
+            document.getElementById('task-deadline').value = date;
+            document.getElementById('task-title').focus();
+        }
     </script>
 </body>
 </html>
