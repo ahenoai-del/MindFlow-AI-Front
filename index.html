@@ -1785,9 +1785,22 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram?.WebApp || {
+            initDataUnsafe: { user: null },
+            initData: '',
+            HapticFeedback: null,
+            expand() {},
+            ready() {},
+            onEvent() {},
+            sendData(data) { console.log('Telegram sendData mock:', data); },
+            showPopup({ title = 'MindFlow', message = '' }) { alert(`${title}\n\n${message}`); },
+            openTelegramLink(url) { window.open(url, '_blank'); }
+        };
         tg.expand();
         tg.ready();
+        if (!tg.initData && !tg.initDataUnsafe?.user) {
+            tg.HapticFeedback = null;
+        }
         
         const telegramUser = tg.initDataUnsafe?.user;
         const USER_ID = telegramUser?.id || 'guest_' + Date.now();
@@ -1823,7 +1836,7 @@
                 if (tasksRes.ok) {
                     const tasksData = await tasksRes.json();
                     const serverTaskIds = new Set(tasksData.map(t => t.id));
-                    const localOnlyTasks = state.tasks.filter(t => !serverTaskIds.has(t.id));
+                    const localOnlyTasks = state.tasks.filter(t => !t.serverSynced && !serverTaskIds.has(t.id));
                     
                     state.tasks = [
                         ...tasksData.map(t => ({
@@ -1835,7 +1848,8 @@
                             deadline: t.deadline,
                             completed: t.status === 'completed',
                             completedAt: t.completed_at,
-                            createdAt: t.created_at
+                            createdAt: t.created_at,
+                            serverSynced: true
                         })),
                         ...localOnlyTasks
                     ];
@@ -1877,7 +1891,7 @@
             if (!API_URL || USER_ID.startsWith('guest_')) return;
             
             try {
-                await fetch(`${API_URL}/api/tasks`, {
+                const res = await fetch(`${API_URL}/api/tasks`, {
                     method: 'POST',
                     headers: apiHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({
@@ -1888,6 +1902,14 @@
                         deadline: task.deadline
                     })
                 });
+                if (res.ok) {
+                    const saved = await res.json();
+                    task.id = saved.id;
+                    task.createdAt = saved.created_at || task.createdAt;
+                    task.serverSynced = true;
+                    saveState();
+                    renderAll();
+                }
             } catch (e) {
                 console.log('Task sync error:', e);
             }
@@ -2004,9 +2026,16 @@
             const storageKey = `mindflow_${USER_ID}`;
             const saved = localStorage.getItem(storageKey);
             if (saved) {
-                const parsed = JSON.parse(saved);
+                let parsed = {};
+                try {
+                    parsed = JSON.parse(saved);
+                } catch (e) {
+                    console.warn('Saved state is corrupted, using defaults:', e);
+                    localStorage.removeItem(storageKey);
+                }
                 state = { ...state, ...parsed, userId: USER_ID, userName: USER_NAME };
                 state.calendar = new Date(state.calendar || Date.now());
+                if (Number.isNaN(state.calendar.getTime())) state.calendar = new Date();
                 
                 // Миграция - убедимся что все поля существуют
                 if (!state.user) state.user = {};
@@ -2020,7 +2049,10 @@
                 // Убедимся что у задач есть id
                 state.tasks = state.tasks.map(t => ({
                     ...t,
-                    id: t.id || Date.now() + Math.random()
+                    id: t.id || Date.now() + Math.random(),
+                    priority: Math.max(1, Math.min(3, parseInt(t.priority || 2))),
+                    tag: t.tag || t.category || 'Прочее',
+                    serverSynced: Boolean(t.serverSynced)
                 }));
             }
             renderAll();
@@ -2028,7 +2060,8 @@
 
         function saveState() {
             const storageKey = `mindflow_${USER_ID}`;
-            localStorage.setItem(storageKey, JSON.stringify(state));
+            const { charts, ...persistedState } = state;
+            localStorage.setItem(storageKey, JSON.stringify({ ...persistedState, charts: {} }));
         }
 
         function getLevel(xp) {
@@ -2121,7 +2154,7 @@
         
         function viewTaskById(id) {
             const idx = getTaskIndexById(id);
-            if (idx !== -1) viewTask(idx);
+            if (idx !== -1) viewTaskByTask(state.tasks[idx]);
         }
 
         function getTagColor(tagName) {
@@ -2170,6 +2203,11 @@
             const pending = state.tasks.filter(t => !t.completed);
             const task = pending[idx];
             if (!task) return;
+            viewTaskByTask(task);
+        }
+
+        function viewTaskByTask(task) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             
             document.getElementById('view-title').textContent = task.title;
             document.getElementById('view-desc').textContent = task.description || '—';
@@ -2432,7 +2470,8 @@
             const task = {
                 id: Date.now(),
                 title, description: desc, priority, tag, deadline,
-                completed: false, createdAt: new Date().toISOString()
+                completed: false, createdAt: new Date().toISOString(),
+                serverSynced: false
             };
             
             state.tasks.push(task);
@@ -2558,7 +2597,8 @@
                         tag: response.category || 'Прочее',
                         deadline: response.deadline,
                         completed: false,
-                        createdAt: new Date().toISOString()
+                        createdAt: new Date().toISOString(),
+                        serverSynced: false
                     };
                     
                     state.tasks.push(newTask);
@@ -2712,6 +2752,7 @@
         function renderAnalytics() {
             const ctx1 = document.getElementById('chart-activity');
             const ctx2 = document.getElementById('chart-category');
+            if (!ctx1 || !ctx2 || typeof Chart === 'undefined') return;
             
             const labels = [];
             const data = [];
