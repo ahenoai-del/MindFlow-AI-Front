@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MindFlow ИИ</title>
+    <title>MindFlow AI</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -770,6 +770,48 @@
 
         .analytics-title { font-size: 15px; font-weight: 700; }
 
+        .achievement-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .achievement-item {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .achievement-item.locked {
+            opacity: 0.45;
+        }
+
+        .achievement-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+            font-size: 20px;
+        }
+
+        .achievement-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .achievement-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
         /* Settings */
         .settings-card {
             padding: 18px;
@@ -1352,7 +1394,7 @@
                 <div class="logo-icon"></div>
                 <div class="logo-text">
                     <h1>MindFlow</h1>
-                    <span>ИИ-планировщик</span>
+                    <span>AI Planner</span>
                 </div>
             </div>
             <div class="header-actions">
@@ -1361,7 +1403,7 @@
                     <span id="level-num">1</span>
                 </div>
                 <button class="icon-btn" onclick="openModal('theme-modal')">🎨</button>
-                <div class="premium-badge" onclick="openModal('premium-modal')" id="premium-badge">⭐ ПРО</div>
+                <div class="premium-badge" onclick="openModal('premium-modal')" id="premium-badge">PRO</div>
             </div>
         </div>
 
@@ -1400,7 +1442,7 @@
             <div class="nav-pill active" data-section="tasks">📋 Задачи</div>
             <div class="nav-pill" data-section="calendar">📅 Календарь</div>
             <div class="nav-pill" data-section="reminders">🔔</div>
-            <div class="nav-pill" data-section="ai">🤖 ИИ</div>
+            <div class="nav-pill" data-section="ai">🤖 AI</div>
             <div class="nav-pill" data-section="analytics">📊 Аналитика</div>
             <div class="nav-pill" data-section="settings">⚙️</div>
         </div>
@@ -1457,7 +1499,7 @@
                     <div class="ai-msg">
                         <div class="ai-avatar">🧠</div>
                         <div class="ai-bubble">Привет, <span id="ai-user-name">друг</span>! 👋<br><br>
-                        Я <b>MindFlow ИИ</b>. Могу:<br>
+                        Я <b>MindFlow AI</b>. Могу:<br>
                         • Создавать задачи<br>
                         • Показывать статистику<br>
                         • Давать советы<br><br>
@@ -1494,6 +1536,13 @@
                     <canvas id="chart-category"></canvas>
                 </div>
             </div>
+            <div class="analytics-card glass">
+                <div class="analytics-header">
+                    <div class="analytics-title">🏅 Достижения</div>
+                    <div id="achievements-counter" style="font-size:12px;color:var(--text-muted);">0/0</div>
+                </div>
+                <div class="achievement-list" id="achievements-list"></div>
+            </div>
         </div>
 
         <!-- Settings Section -->
@@ -1507,7 +1556,7 @@
             </div>
             <div class="settings-card glass" onclick="openModal('premium-modal')">
                 <div class="settings-info">
-                    <h4>⭐ MindFlow Про</h4>
+                    <h4>⭐ MindFlow Pro</h4>
                     <span>Разблокируй все функции</span>
                 </div>
                 <div class="settings-arrow" style="color: #fbbf24;">›</div>
@@ -1519,17 +1568,17 @@
                 </div>
                 <div class="settings-arrow">›</div>
             </div>
-            <div class="settings-card glass" onclick="openModal('invite-modal')">
-                <div class="settings-info">
-                    <h4>👥 Пригласить друга</h4>
-                    <span>Получи Про за приглашения</span>
-                </div>
-                <div class="settings-arrow" style="color: var(--success);">›</div>
-            </div>
             <div class="settings-card glass" onclick="openModal('templates-modal')">
                 <div class="settings-info">
                     <h4>⚡ Шаблоны задач</h4>
                     <span>Быстрое создание</span>
+                </div>
+                <div class="settings-arrow">›</div>
+            </div>
+            <div class="settings-card glass" onclick="inviteFriend()">
+                <div class="settings-info">
+                    <h4>🤝 Пригласить друга</h4>
+                    <span>Отправить ссылку на MindFlowAI</span>
                 </div>
                 <div class="settings-arrow">›</div>
             </div>
@@ -1614,12 +1663,12 @@
     <div class="modal-overlay" id="premium-modal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">⭐ MindFlow Про</div>
+                <div class="modal-title">⭐ MindFlow Pro</div>
                 <button class="modal-close" onclick="closeModal('premium-modal')">✕</button>
             </div>
             <div class="premium-header" style="margin-top: 16px;">
                 <div class="premium-icon">👑</div>
-                <div class="premium-title">MindFlow Про</div>
+                <div class="premium-title">MindFlow Pro</div>
                 <div class="premium-subtitle">Разблокируй все возможности</div>
             </div>
             <div class="premium-features">
@@ -1627,7 +1676,7 @@
                     <div class="premium-feature-icon">🎨</div>
                     <div class="premium-feature-text">
                         <h4>Все темы оформления</h4>
-                        <p>Стекло, Неон, Брутализм...</p>
+                        <p>Glassmorphism, Neon, Brutalism...</p>
                     </div>
                 </div>
                 <div class="premium-feature">
@@ -1640,7 +1689,7 @@
                 <div class="premium-feature">
                     <div class="premium-feature-icon">🤖</div>
                     <div class="premium-feature-text">
-                        <h4>ИИ без лимитов</h4>
+                        <h4>AI без лимитов</h4>
                         <p>Создавай сколько хочешь</p>
                     </div>
                 </div>
@@ -1665,7 +1714,7 @@
             </div>
             <button class="btn premium-btn" onclick="buyPremium()">⭐ Купить за звёзды</button>
             <div class="btn-row">
-                <button class="btn btn-secondary" onclick="checkPremium()">Уже имею ПРО</button>
+                <button class="btn btn-secondary" onclick="checkPremium()">Уже имею PRO</button>
                 <button class="btn btn-secondary" onclick="closeModal('premium-modal')">Отмена</button>
             </div>
         </div>
@@ -1744,35 +1793,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="invite-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">👥 Пригласи друга</div>
-                <button class="modal-close" onclick="closeModal('invite-modal')">✕</button>
-            </div>
-            <div style="text-align:center;margin-bottom:20px;">
-                <div style="font-size:60px;margin-bottom:12px;">🎁</div>
-                <div style="font-size:16px;font-weight:700;margin-bottom:6px;">Получи награду за каждого друга!</div>
-                <div style="color:var(--text-muted);font-size:13px;" id="referral-reward-text">Загрузка...</div>
-            </div>
-            <div style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:16px;padding:16px;margin-bottom:16px;">
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Твоя реферальная ссылка:</div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="text" id="referral-link" class="form-input" readonly style="flex:1;font-size:12px;padding:10px 14px;">
-                    <button class="btn" style="width:auto;padding:10px 18px;font-size:13px;" onclick="copyReferralLink()">📋 Копировать</button>
-                </div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:16px;margin-bottom:16px;">
-                <div>
-                    <div style="font-size:13px;font-weight:600;">Приглашено друзей</div>
-                    <div style="font-size:11px;color:var(--text-muted);">Нажми «Поделиться» чтобы отправить</div>
-                </div>
-                <div style="font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--success),#059669);-webkit-background-clip:text;-webkit-text-fill-color:transparent;" id="referral-count">0</div>
-            </div>
-            <button class="btn" style="background:linear-gradient(135deg,var(--success),#059669);" onclick="shareReferralLink()">📤 Поделиться ссылкой</button>
-        </div>
-    </div>
-
     <!-- Voice Recording Indicator -->
     <div class="modal-overlay" id="voice-modal">
         <div class="modal" style="text-align:center;padding:40px;">
@@ -1785,42 +1805,24 @@
     </div>
 
     <script>
-        const tg = window.Telegram?.WebApp || {
-            initDataUnsafe: { user: null },
-            initData: '',
-            HapticFeedback: null,
-            expand() {},
-            ready() {},
-            onEvent() {},
-            sendData(data) { console.log('Telegram sendData mock:', data); },
-            showPopup({ title = 'MindFlow', message = '' }) { alert(`${title}\n\n${message}`); },
-            openTelegramLink(url) { window.open(url, '_blank'); }
-        };
+        const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
-        if (!tg.initData && !tg.initDataUnsafe?.user) {
-            tg.HapticFeedback = null;
-        }
         
         const telegramUser = tg.initDataUnsafe?.user;
         const USER_ID = telegramUser?.id || 'guest_' + Date.now();
         const USER_NAME = telegramUser?.first_name || 'Гость';
         const API_URL = new URLSearchParams(window.location.search).get('api_url') || '';
-        const INIT_DATA = tg.initData || '';
-        
-        function apiHeaders(extra = {}) {
-            const h = { ...(extra || {}) };
-            if (INIT_DATA) h['X-Telegram-Init-Data'] = INIT_DATA;
-            return h;
-        }
+        const BOT_USERNAME = new URLSearchParams(window.location.search).get('bot_username') || '';
         
         async function syncWithServer() {
             if (!API_URL || USER_ID.startsWith('guest_')) return;
             
             try {
-                const [userRes, tasksRes] = await Promise.all([
-                    fetch(`${API_URL}/api/user/me`, { headers: apiHeaders() }),
-                    fetch(`${API_URL}/api/tasks`, { headers: apiHeaders() })
+                const [userRes, tasksRes, achievementsRes] = await Promise.all([
+                    fetch(`${API_URL}/api/user/${USER_ID}`),
+                    fetch(`${API_URL}/api/tasks/${USER_ID}`),
+                    fetch(`${API_URL}/api/user/${USER_ID}/achievements`)
                 ]);
                 
                 if (userRes.ok) {
@@ -1831,12 +1833,13 @@
                     if (userData.total_completed !== undefined) state.user.completed = userData.total_completed;
                     state.user.premium = userData.is_premium === true;
                     state.user.premium_until = userData.premium_until || null;
+                    state.user.achievementIds = userData.achievements || [];
                 }
                 
                 if (tasksRes.ok) {
                     const tasksData = await tasksRes.json();
                     const serverTaskIds = new Set(tasksData.map(t => t.id));
-                    const localOnlyTasks = state.tasks.filter(t => !t.serverSynced && !serverTaskIds.has(t.id));
+                    const localOnlyTasks = state.tasks.filter(t => !serverTaskIds.has(t.id));
                     
                     state.tasks = [
                         ...tasksData.map(t => ({
@@ -1848,11 +1851,16 @@
                             deadline: t.deadline,
                             completed: t.status === 'completed',
                             completedAt: t.completed_at,
-                            createdAt: t.created_at,
-                            serverSynced: true
+                            createdAt: t.created_at
                         })),
                         ...localOnlyTasks
                     ];
+                }
+
+                if (achievementsRes.ok) {
+                    const achievementData = await achievementsRes.json();
+                    state.achievements = achievementData.items || [];
+                    state.user.achievementIds = achievementData.unlocked || state.user.achievementIds || [];
                 }
                 
                 saveState();
@@ -1865,7 +1873,7 @@
         async function syncPremiumStatus() {
             if (!API_URL || USER_ID.startsWith('guest_')) return;
             try {
-                const res = await fetch(`${API_URL}/api/user/me/premium`, { headers: apiHeaders() });
+                const res = await fetch(`${API_URL}/api/user/${USER_ID}/premium`);
                 if (res.ok) {
                     const data = await res.json();
                     const wasPremium = state.user.premium;
@@ -1875,8 +1883,8 @@
                         saveState();
                         renderAll();
                         createConfetti();
-                        showXPPopup('ПРО!');
-                        tg.showPopup({ title: '🎉 Про активирован!', message: 'MindFlow Про теперь доступен!', buttons: [{ type: 'ok' }] });
+                        showXPPopup('PRO!');
+                        tg.showPopup({ title: '🎉 Premium активирован!', message: 'MindFlow Pro теперь доступен!', buttons: [{ type: 'ok' }] });
                         stopPremiumPolling();
                     }
                     saveState();
@@ -1891,9 +1899,9 @@
             if (!API_URL || USER_ID.startsWith('guest_')) return;
             
             try {
-                const res = await fetch(`${API_URL}/api/tasks`, {
+                await fetch(`${API_URL}/api/tasks/${USER_ID}`, {
                     method: 'POST',
-                    headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         title: task.title,
                         description: task.description,
@@ -1902,14 +1910,6 @@
                         deadline: task.deadline
                     })
                 });
-                if (res.ok) {
-                    const saved = await res.json();
-                    task.id = saved.id;
-                    task.createdAt = saved.created_at || task.createdAt;
-                    task.serverSynced = true;
-                    saveState();
-                    renderAll();
-                }
             } catch (e) {
                 console.log('Task sync error:', e);
             }
@@ -1919,35 +1919,19 @@
             if (!API_URL || USER_ID.startsWith('guest_')) return;
             
             try {
-                await fetch(`${API_URL}/api/tasks/${taskId}/complete`, { method: 'POST', headers: apiHeaders() });
+                await fetch(`${API_URL}/api/tasks/${taskId}/complete?user_id=${USER_ID}`, { method: 'POST' });
             } catch (e) {
                 console.log('Complete sync error:', e);
             }
         }
-
-        async function uncompleteTaskOnServer(taskId) {
-            if (!API_URL || USER_ID.startsWith('guest_')) return;
-            
-            try {
-                await fetch(`${API_URL}/api/tasks/${taskId}/uncomplete`, { method: 'POST', headers: apiHeaders() });
-            } catch (e) {
-                console.log('Uncomplete sync error:', e);
-            }
-        }
-
-        async function deleteTaskOnServer(taskId) {
-            if (!API_URL || USER_ID.startsWith('guest_')) return;
-            
-            try {
-                await fetch(`${API_URL}/api/tasks/${taskId}`, { method: 'DELETE', headers: apiHeaders() });
-            } catch (e) {
-                console.log('Delete sync error:', e);
-            }
-        }
         
         // Handle events from bot
-        tg.onEvent('mainButtonClicked', () => {
-            syncPremiumStatus();
+        tg.onEvent('customEvent', (event) => {
+            if (event.detail?.action === 'premium_activated') {
+                state.user.premium = true;
+                saveState();
+                renderAll();
+            }
         });
         
         // Check premium from URL params (bot can pass it)
@@ -1985,20 +1969,20 @@
         const TAG_COLORS = ['#8b5cf6', '#ef4444', '#10b981', '#f59e0b', '#0ea5e9', '#ec4899', '#6366f1', '#14b8a6'];
         
         const THEMES = [
-            { id: 'glass', name: '🔮 Стекло', desc: 'Стекло', free: true, styles: {} },
-            { id: 'neon', name: '⚡ Неон', desc: 'Неон', free: false, styles: {
+            { id: 'glass', name: '🔮 Glass', desc: 'Стекло', free: true, styles: {} },
+            { id: 'neon', name: '⚡ Neon', desc: 'Неон', free: false, styles: {
                 '--accent': '#00ff88', '--accent-glow': '0 0 30px rgba(0, 255, 136, 0.5)'
             }},
-            { id: 'brutal', name: '🧱 Брутализм', desc: 'Брутализм', free: false, styles: {
+            { id: 'brutal', name: '🧱 Brutal', desc: 'Брутализм', free: false, styles: {
                 '--accent': '#ff3333', '--glass-bg': 'rgba(255,255,255,0.08)', '--glass-border': 'rgba(255,255,255,0.2)'
             }},
-            { id: 'fluid', name: '🌊 Плавный', desc: 'Плавный', free: false, styles: {
+            { id: 'fluid', name: '🌊 Fluid', desc: 'Плавный', free: false, styles: {
                 '--accent': '#0ea5e9', '--glass-border-radius': '30px'
             }},
-            { id: 'dark-purple', name: '💜 Фиолет', desc: 'Фиолет', free: false, styles: {
+            { id: 'dark-purple', name: '💜 Purple', desc: 'Фиолет', free: false, styles: {
                 '--accent': '#a855f7'
             }},
-            { id: 'gold', name: '✨ Золото', desc: 'Золото', free: false, styles: {
+            { id: 'gold', name: '✨ Gold', desc: 'Золото', free: false, styles: {
                 '--accent': '#fbbf24', '--accent-glow': '0 0 30px rgba(251, 191, 36, 0.5)'
             }}
         ];
@@ -2007,6 +1991,8 @@
             userId: USER_ID,
             userName: USER_NAME,
             tasks: [],
+            reminders: [],
+            achievements: [],
             tags: [...DEFAULT_TAGS],
             templates: [
                 { name: 'Встреча', emoji: '💼', tag: 'Работа', priority: 1 },
@@ -2026,16 +2012,9 @@
             const storageKey = `mindflow_${USER_ID}`;
             const saved = localStorage.getItem(storageKey);
             if (saved) {
-                let parsed = {};
-                try {
-                    parsed = JSON.parse(saved);
-                } catch (e) {
-                    console.warn('Saved state is corrupted, using defaults:', e);
-                    localStorage.removeItem(storageKey);
-                }
+                const parsed = JSON.parse(saved);
                 state = { ...state, ...parsed, userId: USER_ID, userName: USER_NAME };
                 state.calendar = new Date(state.calendar || Date.now());
-                if (Number.isNaN(state.calendar.getTime())) state.calendar = new Date();
                 
                 // Миграция - убедимся что все поля существуют
                 if (!state.user) state.user = {};
@@ -2045,14 +2024,14 @@
                 state.user.completed = state.user.completed || 0;
                 state.user.premium = state.user.premium || false;
                 state.user.theme = state.user.theme || 'glass';
+                state.user.achievementIds = state.user.achievementIds || [];
+                state.reminders = state.reminders || [];
+                state.achievements = state.achievements || [];
                 
                 // Убедимся что у задач есть id
                 state.tasks = state.tasks.map(t => ({
                     ...t,
-                    id: t.id || Date.now() + Math.random(),
-                    priority: Math.max(1, Math.min(3, parseInt(t.priority || 2))),
-                    tag: t.tag || t.category || 'Прочее',
-                    serverSynced: Boolean(t.serverSynced)
+                    id: t.id || Date.now() + Math.random()
                 }));
             }
             renderAll();
@@ -2060,8 +2039,7 @@
 
         function saveState() {
             const storageKey = `mindflow_${USER_ID}`;
-            const { charts, ...persistedState } = state;
-            localStorage.setItem(storageKey, JSON.stringify({ ...persistedState, charts: {} }));
+            localStorage.setItem(storageKey, JSON.stringify(state));
         }
 
         function getLevel(xp) {
@@ -2090,9 +2068,7 @@
             document.getElementById('pending-count').textContent = state.tasks.filter(t => !t.completed).length;
             
             if (state.user.premium) {
-                document.getElementById('premium-badge').textContent = 'ПРО ✓';
-            } else {
-                document.getElementById('premium-badge').textContent = '⭐ ПРО';
+                document.getElementById('premium-badge').textContent = 'PRO ✓';
             }
         }
 
@@ -2104,6 +2080,8 @@
             renderThemes();
             renderCalendar();
             renderAnalytics();
+            renderAchievements();
+            renderReminders(state.reminders || []);
         }
 
         function renderTasks() {
@@ -2136,7 +2114,7 @@
                         </div>
                         <div class="task-meta">
                             ${task.deadline ? `<span class="task-meta-item">📅 ${task.deadline}</span>` : ''}
-                            <span class="task-meta-item">${['🔴', '🟡', '🟢'][Math.max(0, Math.min(2, (task.priority || 2) - 1))]}</span>
+                            <span class="task-meta-item">${['🔴', '🟡', '🟢'][task.priority - 1]}</span>
                         </div>
                     </div>
                 </div>
@@ -2154,7 +2132,7 @@
         
         function viewTaskById(id) {
             const idx = getTaskIndexById(id);
-            if (idx !== -1) viewTaskByTask(state.tasks[idx]);
+            if (idx !== -1) viewTask(idx);
         }
 
         function getTagColor(tagName) {
@@ -2191,7 +2169,6 @@
                 task.completedAt = null;
                 state.user.completed = Math.max(0, (state.user.completed || 0) - 1);
                 saveState();
-                uncompleteTaskOnServer(task.id);
             }
             
             renderAll();
@@ -2203,11 +2180,6 @@
             const pending = state.tasks.filter(t => !t.completed);
             const task = pending[idx];
             if (!task) return;
-            viewTaskByTask(task);
-        }
-
-        function viewTaskByTask(task) {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
             
             document.getElementById('view-title').textContent = task.title;
             document.getElementById('view-desc').textContent = task.description || '—';
@@ -2222,7 +2194,6 @@
             document.getElementById('view-delete').onclick = () => {
                 const realIdx = getTaskIndexById(task.id);
                 if (realIdx !== -1) {
-                    deleteTaskOnServer(task.id);
                     state.tasks.splice(realIdx, 1);
                     saveState();
                 }
@@ -2235,20 +2206,18 @@
 
         function renderTemplates() {
             const scroll = document.getElementById('templates-scroll');
-            scroll.innerHTML = state.templates.map((t, i) => 
-                `<div class="template-chip" onclick="createFromTemplate(${i})">${t.emoji} ${escapeHtml(t.name)}</div>`
+            scroll.innerHTML = state.templates.map(t => 
+                `<div class="template-chip" onclick="createFromTemplate('${t.name}', '${t.tag}', ${t.priority})">${t.emoji} ${t.name}</div>`
             ).join('') + `<div class="template-chip template-add" onclick="openModal('templates-modal')">+ Свой</div>`;
         }
 
-        function createFromTemplate(idx) {
-            const t = state.templates[idx];
-            if (!t) return;
-            document.getElementById('task-title').value = t.name;
+        function createFromTemplate(name, tag, priority) {
+            document.getElementById('task-title').value = name;
             document.querySelectorAll('#priority-options .option-btn').forEach(btn => {
-                btn.classList.toggle('selected', btn.dataset.value == t.priority);
+                btn.classList.toggle('selected', btn.dataset.value == priority);
             });
             document.querySelectorAll('#tag-options .option-btn').forEach(btn => {
-                btn.classList.toggle('selected', btn.dataset.tag === t.tag);
+                btn.classList.toggle('selected', btn.dataset.tag === tag);
             });
             openModal('task-modal');
         }
@@ -2355,7 +2324,6 @@
 
         function buyPremium() {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            startPremiumPolling();
             tg.sendData(JSON.stringify({
                 action: 'buy_premium',
                 plan: selectedPlan
@@ -2370,15 +2338,15 @@
                 });
             } else {
                 tg.sendData(JSON.stringify({ action: 'check_premium' }));
-                tg.showPopup({ title: 'Проверка Про', message: 'Запрос отправлен боту. Ответ придёт в чат.', buttons: [{ type: 'ok' }] });
+                tg.showPopup({ title: 'Проверка Premium', message: 'Запрос отправлен боту. Ответ придёт в чат.', buttons: [{ type: 'ok' }] });
             }
         }
 
         function _showPremiumResult() {
             if (state.user.premium) {
-                tg.showPopup({ title: '✅ Про активен', message: 'MindFlow Про подключён!' + (state.user.premium_until ? '\nДействует до: ' + state.user.premium_until : ''), buttons: [{ type: 'ok' }] });
+                tg.showPopup({ title: '✅ Premium активен', message: 'MindFlow Pro подключён!' + (state.user.premium_until ? '\nДействует до: ' + state.user.premium_until : ''), buttons: [{ type: 'ok' }] });
             } else {
-                tg.showPopup({ title: '❌ Про не активен', message: 'Подключите MindFlow Про для доступа ко всем функциям', buttons: [{ type: 'ok' }] });
+                tg.showPopup({ title: '❌ Premium не активен', message: 'Подключите MindFlow Pro для доступа ко всем функциям', buttons: [{ type: 'ok' }] });
             }
         }
         
@@ -2388,7 +2356,7 @@
             renderAll();
             closeModal('premium-modal');
             createConfetti();
-            tg.showPopup({ title: '✓ Готово', message: 'MindFlow Про активирован!', buttons: [{ type: 'ok' }] });
+            tg.showPopup({ title: '✓ Готово', message: 'MindFlow Pro активирован!', buttons: [{ type: 'ok' }] });
         }
 
         function showXPPopup(xp) {
@@ -2470,8 +2438,7 @@
             const task = {
                 id: Date.now(),
                 title, description: desc, priority, tag, deadline,
-                completed: false, createdAt: new Date().toISOString(),
-                serverSynced: false
+                completed: false, createdAt: new Date().toISOString()
             };
             
             state.tasks.push(task);
@@ -2486,7 +2453,18 @@
             renderAll();
             
             await syncTaskToServer(task);
-};
+            
+            try {
+                tg.sendData(JSON.stringify({
+                    action: 'add_task',
+                    title,
+                    description: desc,
+                    priority,
+                    category: tag,
+                    deadline
+                }));
+            } catch(e) {}
+        };
 
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
@@ -2597,13 +2575,11 @@
                         tag: response.category || 'Прочее',
                         deadline: response.deadline,
                         completed: false,
-                        createdAt: new Date().toISOString(),
-                        serverSynced: false
+                        createdAt: new Date().toISOString()
                     };
                     
                     state.tasks.push(newTask);
                     saveState();
-                    syncTaskToServer(newTask);
                     
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                     
@@ -2680,7 +2656,7 @@
             if (lower.includes('привет') || lower.includes('здравствуй') || lower.includes('хай') || lower.includes('hi')) {
                 const hour = new Date().getHours();
                 let greeting = hour < 12 ? 'Доброе утро' : hour < 18 ? 'Добрый день' : 'Добрый вечер';
-                return { message: `${greeting}, ${state.userName}! 👋<br><br>Я MindFlow ИИ. Могу:<br>
+                return { message: `${greeting}, ${state.userName}! 👋<br><br>Я MindFlow AI. Могу:<br>
                     • Создавать задачи (напиши что нужно сделать)<br>
                     • Показать статистику<br>
                     • Дать советы по продуктивности<br><br>Просто напиши задачу, например: "завтра встреча с клиентом в 15:00"` };
@@ -2752,22 +2728,17 @@
         function renderAnalytics() {
             const ctx1 = document.getElementById('chart-activity');
             const ctx2 = document.getElementById('chart-category');
-            if (!ctx1 || !ctx2 || typeof Chart === 'undefined') return;
             
-            const labels = [];
-            const data = [];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(Date.now() - i * 86400000);
-                labels.push(d.toLocaleDateString('ru', { weekday: 'short' }));
-                const dayStr = d.toISOString().split('T')[0];
-                data.push(state.tasks.filter(t => t.completedAt?.startsWith(dayStr)).length);
-            }
-            
-            if (state.charts.activity) {
-                state.charts.activity.data.labels = labels;
-                state.charts.activity.data.datasets[0].data = data;
-                state.charts.activity.update();
-            } else {
+            if (!state.charts.activity) {
+                const labels = [];
+                const data = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(Date.now() - i * 86400000);
+                    labels.push(d.toLocaleDateString('ru', { weekday: 'short' }));
+                    const dayStr = d.toISOString().split('T')[0];
+                    data.push(state.tasks.filter(t => t.completedAt?.startsWith(dayStr)).length);
+                }
+                
                 state.charts.activity = new Chart(ctx1, {
                     type: 'line',
                     data: {
@@ -2791,18 +2762,12 @@
                         }
                     }
                 });
-            }
-            
-            const tagData = {};
-            state.tasks.filter(t => t.completed).forEach(t => {
-                tagData[t.tag] = (tagData[t.tag] || 0) + 1;
-            });
-            
-            if (state.charts.category) {
-                state.charts.category.data.labels = Object.keys(tagData);
-                state.charts.category.data.datasets[0].data = Object.values(tagData);
-                state.charts.category.update();
-            } else {
+                
+                const tagData = {};
+                state.tasks.filter(t => t.completed).forEach(t => {
+                    tagData[t.tag] = (tagData[t.tag] || 0) + 1;
+                });
+                
                 state.charts.category = new Chart(ctx2, {
                     type: 'doughnut',
                     data: {
@@ -2826,6 +2791,31 @@
             }
         }
 
+        function renderAchievements() {
+            const list = document.getElementById('achievements-list');
+            const counter = document.getElementById('achievements-counter');
+            if (!list || !counter) return;
+
+            const achievements = state.achievements || [];
+            if (!achievements.length) {
+                list.innerHTML = '<div class="empty" style="padding:20px;"><div class="empty-icon" style="font-size:42px;">🏅</div><div class="empty-title">Достижения загружаются</div><div class="empty-text">Открой приложение через бота и проверь API_URL</div></div>';
+                counter.textContent = '0/0';
+                return;
+            }
+
+            const unlockedCount = achievements.filter(a => a.unlocked).length;
+            counter.textContent = `${unlockedCount}/${achievements.length}`;
+            list.innerHTML = achievements.map(a => `
+                <div class="achievement-item ${a.unlocked ? '' : 'locked'}">
+                    <div class="achievement-icon">${a.unlocked ? a.icon : '🔒'}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div class="achievement-name">${escapeHtml(a.name)}</div>
+                        <div class="achievement-desc">${escapeHtml(a.description)} · ${a.xp} XP</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function addTemplate() {
             const name = document.getElementById('new-template-name').value.trim();
             const emoji = document.getElementById('new-template-emoji').value.trim() || '📝';
@@ -2841,10 +2831,9 @@
         loadState();
         syncWithServer();
         syncPremiumStatus();
-        if (!state.user.premium) startPremiumPolling();
+        startPremiumPolling();
         initPushNotifications();
         loadReminders();
-        loadReferralData();
         
         document.getElementById('ai-user-name').textContent = state.userName;
         
@@ -2860,6 +2849,33 @@
             }
         });
 
+        async function inviteFriend() {
+            const text = 'Попробуй MindFlowAI: задачи, напоминания, AI-планирование и прогресс в одном мини-приложении.';
+            let inviteUrl = window.location.href;
+
+            if (BOT_USERNAME) {
+                inviteUrl = `https://t.me/${BOT_USERNAME}?start=ref_${USER_ID}`;
+            }
+
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'MindFlowAI', text, url: inviteUrl });
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return;
+                }
+            }
+
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteUrl)}&text=${encodeURIComponent(text)}`;
+            if (tg.openTelegramLink) {
+                tg.openTelegramLink(shareUrl);
+            } else {
+                window.open(shareUrl, '_blank');
+            }
+        }
+        
         // === PUSH NOTIFICATIONS ===
         async function initPushNotifications() {
             if (!API_URL || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
@@ -2872,12 +2888,12 @@
                     await sendSubscriptionToServer(sub);
                     return;
                 }
-                const vapidRes = await fetch(`${API_URL}/api/vapid-public-key`, { headers: apiHeaders() });
+                const vapidRes = await fetch(`${API_URL}/api/vapid-public-key`);
                 if (!vapidRes.ok) return;
                 const { publicKey } = await vapidRes.json();
                 const newSub = await reg.pushManager.subscribe({
                     userVisibleOnly: true,
-                    applicationServerKey: publicKey,
+                    applicationServerKey: urlBase64ToUint8Array(publicKey),
                 });
                 await sendSubscriptionToServer(newSub);
             } catch (e) {
@@ -2885,12 +2901,19 @@
             }
         }
 
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+        }
+
         async function sendSubscriptionToServer(subscription) {
             if (!API_URL) return;
             try {
-                await fetch(`${API_URL}/api/push/subscribe`, {
+                await fetch(`${API_URL}/api/push/${USER_ID}/subscribe`, {
                     method: 'POST',
-                    headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ subscription: JSON.stringify(subscription) }),
                 });
             } catch (e) {
@@ -2934,7 +2957,7 @@
                         const formData = new FormData();
                         formData.append('file', blob, `voice.${ext}`);
                         try {
-                            const res = await fetch(`${API_URL}/api/voice`, { method: 'POST', body: formData, headers: apiHeaders() });
+                            const res = await fetch(`${API_URL}/api/voice/${USER_ID}`, { method: 'POST', body: formData });
                             if (res.ok) {
                                 const data = await res.json();
                                 if (data.text) {
@@ -2969,20 +2992,22 @@
         // === REMINDERS ===
         async function loadReminders() {
             if (!API_URL || USER_ID.startsWith('guest_')) {
-                renderReminders([]);
+                renderReminders(state.reminders || []);
                 return;
             }
             try {
-                const res = await fetch(`${API_URL}/api/reminders`, { headers: apiHeaders() });
+                const res = await fetch(`${API_URL}/api/reminders/${USER_ID}`);
                 if (res.ok) {
                     const reminders = await res.json();
+                    state.reminders = reminders;
+                    saveState();
                     renderReminders(reminders);
                     return;
                 }
             } catch (e) {
                 console.log('Load reminders error:', e);
             }
-            renderReminders([]);
+            renderReminders(state.reminders || []);
         }
 
         function renderReminders(reminders) {
@@ -3015,18 +3040,31 @@
         }
 
         async function snoozeReminder(id) {
-            if (!API_URL) return;
+            if (!API_URL) {
+                const reminder = (state.reminders || []).find(r => r.id === id);
+                if (reminder) {
+                    reminder.remind_at = new Date(Date.now() + 10 * 60000).toISOString();
+                    saveState();
+                    renderReminders(state.reminders);
+                }
+                return;
+            }
             try {
-                await fetch(`${API_URL}/api/reminders/${id}/snooze`, { method: 'POST', headers: apiHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ minutes: 10 }) });
+                await fetch(`${API_URL}/api/reminders/${id}/snooze?user_id=${USER_ID}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ minutes: 10 }) });
                 loadReminders();
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             } catch (e) { console.log('Snooze error:', e); }
         }
 
         async function deleteReminder(id) {
-            if (!API_URL) return;
+            if (!API_URL) {
+                state.reminders = (state.reminders || []).filter(r => r.id !== id);
+                saveState();
+                renderReminders(state.reminders);
+                return;
+            }
             try {
-                await fetch(`${API_URL}/api/reminders/${id}`, { method: 'DELETE', headers: apiHeaders() });
+                await fetch(`${API_URL}/api/reminders/${id}?user_id=${USER_ID}`, { method: 'DELETE' });
                 loadReminders();
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             } catch (e) { console.log('Delete reminder error:', e); }
@@ -3049,14 +3087,18 @@
 
             if (API_URL) {
                 try {
-                    const res = await fetch(`${API_URL}/api/reminders`, {
+                    const res = await fetch(`${API_URL}/api/reminders/${USER_ID}`, {
                         method: 'POST',
-                        headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ text, remind_at: remindAt, repeat_interval: repeat || null }),
                     });
                     if (res.ok) {
+                        const created = await res.json();
                         closeModal('reminder-modal');
                         document.getElementById('reminder-form').reset();
+                        state.reminders = [created, ...(state.reminders || []).filter(r => r.id !== created.id)];
+                        saveState();
+                        renderReminders(state.reminders);
                         loadReminders();
                         if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                         tg.showPopup({ title: '✅ Готово', message: 'Напоминание создано!', buttons: [{ type: 'ok' }] });
@@ -3069,6 +3111,17 @@
                     tg.showPopup({ title: 'Ошибка', message: 'Сервер недоступен. Напиши /remind в чате бота.', buttons: [{ type: 'ok' }] });
                 }
             } else {
+                const localReminder = {
+                    id: Date.now(),
+                    text,
+                    remind_at: remindAt,
+                    repeat_interval: repeat || null,
+                    status: 'pending',
+                    created_at: new Date().toISOString(),
+                };
+                state.reminders = [localReminder, ...(state.reminders || [])];
+                saveState();
+                renderReminders(state.reminders);
                 tg.sendData(JSON.stringify({ action: 'add_reminder', text, remind_at: remindAt, repeat_interval: repeat }));
                 closeModal('reminder-modal');
                 document.getElementById('reminder-form').reset();
@@ -3105,59 +3158,6 @@
             else if (preset === 'week') { const d = new Date(); d.setDate(d.getDate() + 7); date = d.toISOString().split('T')[0]; }
             document.getElementById('task-deadline').value = date;
             document.getElementById('task-title').focus();
-        }
-
-        // === REFERRAL / INVITE FRIEND ===
-        let referralData = { link: '', count: 0 };
-
-        async function loadReferralData() {
-            if (!API_URL || USER_ID.startsWith('guest_')) return;
-            try {
-                const res = await fetch(`${API_URL}/api/user/me/referrals`, { headers: apiHeaders() });
-                if (res.ok) {
-                    const data = await res.json();
-                    referralData.link = data.referral_link || '';
-                    referralData.count = data.referral_count || 0;
-                    const linkEl = document.getElementById('referral-link');
-                    if (linkEl) linkEl.value = referralData.link;
-                    const countEl = document.getElementById('referral-count');
-                    if (countEl) countEl.textContent = referralData.count;
-                    const rewardEl = document.getElementById('referral-reward-text');
-                    if (rewardEl) rewardEl.textContent = `+${data.reward_premium_days || 3} дн. Про + ${data.reward_xp || 50} XP за каждое приглашение`;
-                }
-            } catch (e) {
-                console.log('Referral load error:', e);
-            }
-        }
-
-        function copyReferralLink() {
-            const link = referralData.link || document.getElementById('referral-link')?.value || '';
-            if (!link) {
-                tg.showPopup({ title: 'Ошибка', message: 'Ссылка недоступна', buttons: [{ type: 'ok' }] });
-                return;
-            }
-            navigator.clipboard.writeText(link).then(() => {
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                tg.showPopup({ title: '✅ Скопировано', message: 'Ссылка скопирована в буфер обмена!', buttons: [{ type: 'ok' }] });
-            }).catch(() => {
-                tg.showPopup({ title: 'Ссылка', message: link, buttons: [{ type: 'ok' }] });
-            });
-        }
-
-        function shareReferralLink() {
-            const link = referralData.link;
-            if (!link) {
-                tg.showPopup({ title: 'Ошибка', message: 'Ссылка недоступна', buttons: [{ type: 'ok' }] });
-                return;
-            }
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            if (tg.openTelegramLink) {
-                tg.openTelegramLink(link);
-            } else {
-                navigator.clipboard.writeText(link).then(() => {
-                    tg.showPopup({ title: '✅ Скопировано', message: 'Отправь ссылку другу!', buttons: [{ type: 'ok' }] });
-                });
-            }
         }
     </script>
 </body>
